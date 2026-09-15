@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shorts-editor-cleanup"
+version = "0.1.0"
+description = "Commercial-safe core for AI-assisted video cleanup"
+requires-python = ">=3.10"
+license = {text = "Proprietary"}
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+where = ["src"]
