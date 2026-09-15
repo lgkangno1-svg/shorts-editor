@@ -20,7 +20,7 @@
 - No benchmark or regression test was claimed or run.
 - Synthetic clean/overlaid twin clips were selected as the future objective benchmark pattern.
 
-### Promotion decision
+### promotion decision
 **DOCUMENTATION ONLY.** Stable code remained untouched.
 
 ## Loop 010 — 2026-09-16
@@ -49,10 +49,8 @@
 
 ### External review
 - Netflix VOID remains the cleanest hard-case candidate found: official GitHub/model are Apache-2.0, with Pass 2 intended to improve temporal consistency, but official guidance still targets 40GB+ VRAM.
-- LaMa Apache-2.0 ONNX/safetensors variants remain useful candidates for a cheap still-frame/local-fast baseline, but must be benchmarked for temporal flicker before adoption.
-- LTX-2.3 in/outpainting was reviewed but uses the LTX community license rather than Apache-2.0, so it was not adopted automatically.
-- MiniMax-Remover weights are CC-BY-NC-4.0 and remain excluded from production.
-- Hugging Face connector invocation failed in this run, so no dependency was adopted from an unverified connector result.
+- LaMa Apache-2.0 variants remain useful candidates for a cheap still-frame/local-fast baseline, but must be benchmarked for temporal flicker before adoption.
+- MiniMax-Remover weights are non-commercial and remain excluded from production.
 
 ### Evidence / limitations
 - Tests were added but no passing CI/local run is claimed in this loop.
@@ -60,3 +58,22 @@
 
 ### Promotion decision
 **KEEP ON DEVELOPMENT BRANCH.** Next highest-value slice is the actual job pipeline plus synthetic clean/overlay video fixtures and measurable QC.
+
+## Loop 012 — 2026-09-16
+
+### Repository audit and implementation
+- Re-audited the full successor branch; no dead/duplicate implementation modules were found.
+- Added a deterministic scene-aware chunk planner so temporal engines never process across known shot boundaries and every inference window stays under its frame budget.
+- Added tests for bounded chunking, scene-cut isolation and invalid-cut rejection.
+
+### External review
+- Reconfirmed Netflix VOID as Apache-2.0 and suitable only for routed hard cases due to its official 40GB+ VRAM guidance and up-to-197-frame design.
+- Reconfirmed MiniMax-Remover weights are CC-BY-NC-4.0 and excluded from commercial production.
+- ProPainter-dependent projects remain architecture references only, not production dependencies.
+
+### Evidence / limitations
+- No passing local or CI run is claimed in this loop; tests were committed but execution evidence is still absent.
+- Stable `main` remains unchanged.
+
+### Promotion decision
+**KEEP ON DEVELOPMENT BRANCH.** Next slice: connect chunk planning to a real video job executor and add synthetic video fixtures/quality measurements.
