@@ -38,11 +38,7 @@ class RouteDecision:
 
 
 def difficulty_score(request: CleanupRequest) -> float:
-    """Conservative score used before expensive inference.
-
-    Low mask confidence increases difficulty because an inaccurate mask can
-    damage protected content even when reconstruction itself is easy.
-    """
+    """Conservative score used before expensive inference."""
     score = (
         0.22 * request.mask_area_ratio
         + 0.22 * request.motion_score
@@ -57,8 +53,13 @@ def route_cleanup(request: CleanupRequest) -> RouteDecision:
     score = difficulty_score(request)
     if request.mask_confidence < 0.45:
         return RouteDecision(Engine.SMART_PRO, score, "low mask confidence")
-    if score < 0.28 and request.mask_area_ratio < 0.12:
-        return RouteDecision(Engine.LOCAL_FAST, score, "small, low-complexity removal")
+
+    # Frame-local cleanup is deliberately limited to short, simple clips.
+    # On longer clips, even a small static mask can expose frame-to-frame
+    # reconstruction drift that is more visible than the removed overlay.
+    if score < 0.28 and request.mask_area_ratio < 0.12 and request.duration_seconds <= 30.0:
+        return RouteDecision(Engine.LOCAL_FAST, score, "small, short, low-complexity removal")
     if score < 0.62:
-        return RouteDecision(Engine.LOCAL_TEMPORAL, score, "temporal reconstruction required")
+        reason = "long clip requires temporal consistency" if request.duration_seconds > 30.0 else "temporal reconstruction required"
+        return RouteDecision(Engine.LOCAL_TEMPORAL, score, reason)
     return RouteDecision(Engine.SMART_PRO, score, "high-complexity reconstruction")
