@@ -14,6 +14,7 @@ def test_static_watermark_track():
     assert track.min_confidence == pytest.approx(0.9)
     assert track.max_area_ratio == pytest.approx(0.01)
     assert track.max_center_jump() == pytest.approx(0.0)
+    assert track.max_center_velocity() == pytest.approx(0.0)
     assert not track.has_tracking_risk()
 
 
@@ -21,6 +22,7 @@ def test_moving_watermark_track():
     track = RemovalTrack("wm-2", TargetKind.WATERMARK, (sample(0), sample(1, x=0.2)))
     assert track.is_moving
     assert track.max_center_jump() == pytest.approx(0.1)
+    assert track.max_center_velocity() == pytest.approx(0.1)
     assert not track.has_tracking_risk()
 
 
@@ -31,6 +33,13 @@ def test_tracking_risk_flags_confidence_collapse_and_large_jump():
     jump = RemovalTrack("wm-jump", TargetKind.WATERMARK, (sample(0), sample(1, x=0.5)))
     assert low_conf.has_tracking_risk()
     assert jump.has_tracking_risk(max_center_jump=0.25)
+
+
+def test_sparse_samples_use_per_frame_motion_for_risk():
+    track = RemovalTrack("sparse", TargetKind.OBJECT, (sample(0), sample(10, x=0.5)))
+    assert track.max_center_jump() == pytest.approx(0.4)
+    assert track.max_center_velocity() == pytest.approx(0.04)
+    assert not track.has_tracking_risk(max_center_jump=0.25)
 
 
 def test_tracking_risk_thresholds_are_validated():
