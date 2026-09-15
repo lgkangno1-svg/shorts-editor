@@ -115,3 +115,22 @@
 
 ### promotion decision
 **KEEP ON DEVELOPMENT BRANCH.** Next slice remains a real video executor plus synthetic paired-video quality benchmark.
+
+## Loop 015 — 2026-09-16
+
+### Repository audit and implementation
+- Added overlap-safe temporal processing windows: inference may consume neighbouring context frames while emitted regions partition each scene-bounded chunk exactly once.
+- This prepares temporal reconstruction for seam reduction without duplicate output frames or context leakage across scene cuts.
+- Added regression tests for exact frame partitioning, context bounds, containment, and invalid overlap rejection.
+
+### External review
+- Reconfirmed official VOID model metadata as Apache-2.0; its optional second pass uses flow-warped refinement specifically for temporal consistency, supporting the decision to preserve neighbouring context around inference windows.
+- SVOR remains an Apache-2.0 research candidate whose MUSE design highlights robustness benefits from temporal mask unions under abrupt motion; no dependency was adopted from metadata alone.
+- MiniMax-Remover and EffectErase remain excluded from commercial production due to non-commercial licensing.
+
+### Evidence / limitations
+- New code/tests are committed but have not yet been observed passing CI; no pass claim is made.
+- Stable `main` remains unchanged because objective video-quality benchmarks are still absent.
+
+### promotion decision
+**KEEP ON DEVELOPMENT BRANCH.** Next slice: executable video job orchestration and paired synthetic clean/overlay benchmark scoring.
