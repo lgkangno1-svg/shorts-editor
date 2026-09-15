@@ -41,116 +41,44 @@
 **DO NOT MERGE TO STABLE YET.** Keep on `feature/vmake-parity-core` until CI passes and real video fixtures/quality benchmarks exist.
 
 ## Loop 011 — 2026-09-16
-
-### Repository audit and implementation
-- Audited the complete successor branch; it remains small with no duplicate/dead modules identified yet.
-- Added bounded QC escalation: failed Local Fast jobs move to Local Temporal, failed Local Temporal jobs move to Smart Pro, and failed Smart Pro jobs stop for manual review instead of looping or silently shipping a bad render.
-- Added four tests covering escalation order, failed fast escalation, terminal Smart Pro failure, and no retry after a passing QC result.
-
-### External review
-- Netflix VOID remains the cleanest hard-case candidate found: official GitHub/model are Apache-2.0, with Pass 2 intended to improve temporal consistency, but official guidance still targets 40GB+ VRAM.
-- LaMa Apache-2.0 variants remain useful candidates for a cheap still-frame/local-fast baseline, but must be benchmarked for temporal flicker before adoption.
-- MiniMax-Remover weights are non-commercial and remain excluded from production.
-
-### Evidence / limitations
-- Tests were added but no passing CI/local run is claimed in this loop.
-- Stable `main` remains unchanged until executable CI and video-quality evidence exist.
-
-### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next highest-value slice is the actual job pipeline plus synthetic clean/overlay video fixtures and measurable QC.
+- Added bounded QC escalation: Local Fast -> Local Temporal -> Smart Pro; terminal failure requires manual review.
+- Tests added; no passing CI/local run claimed for this head.
 
 ## Loop 012 — 2026-09-16
-
-### Repository audit and implementation
-- Re-audited the full successor branch; no dead/duplicate implementation modules were found.
-- Added a deterministic scene-aware chunk planner so temporal engines never process across known shot boundaries and every inference window stays under its frame budget.
-- Added tests for bounded chunking, scene-cut isolation and invalid-cut rejection.
-
-### External review
-- Reconfirmed Netflix VOID as Apache-2.0 and suitable only for routed hard cases due to its official 40GB+ VRAM guidance and up-to-197-frame design.
-- Reconfirmed MiniMax-Remover weights are CC-BY-NC-4.0 and excluded from commercial production.
-- ProPainter-dependent projects remain architecture references only, not production dependencies.
-
-### Evidence / limitations
-- No passing local or CI run is claimed in this loop; tests were committed but execution evidence is still absent.
-- Stable `main` remains unchanged.
-
-### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next slice: connect chunk planning to a real video job executor and add synthetic video fixtures/quality measurements.
+- Added deterministic scene-aware chunk planning so temporal inference does not cross shot boundaries.
+- Tests added; stable remained unchanged.
 
 ## Loop 013 — 2026-09-16
-
-### Repository audit and implementation
-- Verified the previous scene-aware branch head with GitHub Actions: the Python 3.10/3.12 CI workflow completed successfully.
-- Added safe padded-crop geometry for removal masks. Small corner subtitles/logos can now be planned as bounded crops instead of requiring full-frame inference, reducing expected compute while rejecting invalid/out-of-frame regions.
-- Added tests for frame-edge clipping, invalid regions, negative padding and crop-savings calculation.
-
-### External review
-- SAM 3 was reviewed but is not adopted automatically: upstream now uses a dedicated SAM License rather than Apache-2.0, so commercial eligibility must be reviewed explicitly before production use.
-- Apache-2.0 Hugging Face candidates for video inpainting/restoration were found, but model-card license metadata alone is insufficient evidence to add them as dependencies; upstream code/base-model terms must also be checked.
-- MiniMax-Remover remains excluded because its weights are non-commercial.
-
-### Evidence / limitations
-- Previous branch head CI is confirmed passing. The newly added crop tests are committed; their new CI run is not yet claimed as passing.
-- Stable `main` remains unchanged because real video-quality benchmarks are still missing.
-
-### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next slice: video job executor plus synthetic clean/overlay fixtures and objective quality scoring.
+- Previous scene-aware head was verified passing GitHub Actions on Python 3.10/3.12.
+- Added padded crop geometry to reduce compute for small removal regions; new head CI was not yet claimed.
 
 ## Loop 014 — 2026-09-16
-
-### Repository audit and implementation
-- Found `duration_seconds` was validated but ignored by routing, allowing arbitrarily long clips onto frame-local cleanup despite temporal drift risk.
-- Local Fast is now restricted to short (<=30s), simple jobs; otherwise easy long clips route to Local Temporal.
-- Added regression coverage for the long-clip route.
-
-### External review
-- Hugging Face metadata confirms Netflix VOID, ROSE and SVOR as Apache-2.0 candidates; VOID remains a high-VRAM hard-case option.
-- EffectErase is CC-BY-NC-4.0 and is excluded from commercial production.
-- No new model dependency was added without end-to-end upstream/base-model license review.
-
-### Evidence / limitations
-- Code and regression test are committed, but this new head has not yet been observed passing CI; no test-pass claim is made.
-- Stable `main` remains unchanged pending real video-quality benchmarks.
-
-### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next slice remains a real video executor plus synthetic paired-video quality benchmark.
+- Fixed routing bug where duration was ignored: Local Fast is now limited to short/simple jobs; long easy clips use Local Temporal.
+- Regression test added; no new-head pass claim.
 
 ## Loop 015 — 2026-09-16
-
-### Repository audit and implementation
-- Added overlap-safe temporal processing windows: inference may consume neighbouring context frames while emitted regions partition each scene-bounded chunk exactly once.
-- This prepares temporal reconstruction for seam reduction without duplicate output frames or context leakage across scene cuts.
-- Added regression tests for exact frame partitioning, context bounds, containment, and invalid overlap rejection.
-
-### External review
-- Reconfirmed official VOID model metadata as Apache-2.0; its optional second pass uses flow-warped refinement specifically for temporal consistency, supporting the decision to preserve neighbouring context around inference windows.
-- SVOR remains an Apache-2.0 research candidate whose MUSE design highlights robustness benefits from temporal mask unions under abrupt motion; no dependency was adopted from metadata alone.
-- MiniMax-Remover and EffectErase remain excluded from commercial production due to non-commercial licensing.
-
-### Evidence / limitations
-- New code/tests are committed but have not yet been observed passing CI; no pass claim is made.
-- Stable `main` remains unchanged because objective video-quality benchmarks are still absent.
-
-### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next slice: executable video job orchestration and paired synthetic clean/overlay benchmark scoring.
+- Added overlap-safe temporal context windows while emitting every frame exactly once and respecting scene cuts.
+- New tests committed; no pass claim for the new head.
 
 ## Loop 016 — 2026-09-16
+- Added tracking fail-safe signals using confidence and center displacement; switched motion detection from top-left to box center.
+- SAM2/VOID/SVOR remain commercial candidates; ProPainter/DiffuEraser default pipeline remains excluded.
+- New tests committed; stable unchanged.
+
+## Loop 017 — 2026-09-16
 
 ### Repository audit and implementation
-- Added engine-neutral tracking-risk signals: minimum confidence plus maximum normalized center jump between consecutive samples. This gives SAM2/future trackers a fail-safe contract so abrupt drift or confidence collapse can trigger re-detection instead of contaminating inpainting masks.
-- Changed movement detection to use box centers rather than top-left coordinates, avoiding false motion when a tracker changes mask extent around a stationary target.
-- Added regression coverage for normal motion, confidence collapse, abrupt jumps and invalid thresholds.
+- Found tracking-risk logic treated displacement between sparse keyframes as if it occurred in one frame. A valid target moving gradually over ten frames could therefore be falsely classified as tracker drift and trigger unnecessary re-detection/escalation.
+- Added `max_center_velocity()` and changed risk gating to normalized displacement per frame while retaining raw `max_center_jump()` for diagnostics.
+- Added regression coverage proving a 0.4 normalized displacement over ten frames is treated as 0.04/frame rather than an abrupt 0.4-frame jump.
 
 ### External review
-- Hugging Face SAM2 video support confirms promptable video mask propagation/tracking; SAM2 checkpoints/code remain Apache-2.0 candidates.
-- Netflix VOID remains Apache-2.0 and suitable for routed hard cases.
-- Xiaomi SVOR is Apache-2.0 and worth future benchmark evaluation for imperfect-mask robustness, but no dependency was adopted without local quality/cost evidence.
-- DiffuEraser remains excluded from production in its published default configuration because it uses ProPainter as a prior and explicitly requires compliance with ProPainter licensing.
+- Hugging Face connector model search failed during this loop, so no model was adopted from unverified metadata.
+- Existing commercial-policy gate remains unchanged: SAM2/VOID/SVOR are candidates pending benchmarks; non-commercial ProPainter-derived production paths remain excluded.
 
 ### Evidence / limitations
-- The new tests are committed but no passing CI/local execution is claimed for this head; GitHub had no workflow run attached to the pre-change head when checked.
-- Stable `main` remains unchanged; objective video-quality benchmarking is still the promotion gate.
+- Code and regression test are committed. No passing local/CI execution is claimed for this new head yet.
+- Stable `main` remains unchanged pending CI and objective paired-video quality benchmarks.
 
 ### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next slice remains executable job orchestration plus paired synthetic video quality scoring.
+**KEEP ON DEVELOPMENT BRANCH.** Next highest-value gate remains executable paired clean/overlay video benchmarking plus objective quality scoring.
