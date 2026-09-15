@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "artifact": "single_product_empirical_timing_envelope",
+  "evidence_label": "confirmed",
+  "derivation": "duration-normalized projection of committed confirmed timing statistics",
+  "source": "data/seed_timing_stats.json",
+  "source_stats_schema_version": 3,
+  "single_product_sample_count": 12,
+  "timing_source_counts": {"direct_visual": 11, "direct_audiovisual": 1},
+  "events": {
+    "hook_end_sec": {"evidence_label": "confirmed", "observed_n": 12, "duration_percent": {"p25": 12.733, "median": 20.9732, "p75": 22.7082}, "duration_fraction": {"p25": 0.12733, "median": 0.209732, "p75": 0.227082}},
+    "product_reveal_sec": {"evidence_label": "confirmed", "observed_n": 12, "duration_percent": {"p25": 4.5559, "median": 12.7327, "p75": 22.3197}, "duration_fraction": {"p25": 0.045559, "median": 0.127327, "p75": 0.223197}},
+    "first_demo_sec": {"evidence_label": "confirmed", "observed_n": 12, "duration_percent": {"p25": 13.7997, "median": 21.2621, "p75": 32.0378}, "duration_fraction": {"p25": 0.137997, "median": 0.212621, "p75": 0.320378}},
+    "first_proof_sec": {"evidence_label": "confirmed", "observed_n": 12, "duration_percent": {"p25": 30.8461, "median": 38.9309, "p75": 48.8856}, "duration_fraction": {"p25": 0.308461, "median": 0.389309, "p75": 0.488856}},
+    "secondary_proof_sec": {"evidence_label": "confirmed", "observed_n": 10, "duration_percent": {"p25": 44.9874, "median": 57.2796, "p75": 69.0207}, "duration_fraction": {"p25": 0.449874, "median": 0.572796, "p75": 0.690207}},
+    "payoff_or_wrap_sec": {"evidence_label": "confirmed", "observed_n": 12, "duration_percent": {"p25": 83.5915, "median": 87.1129, "p75": 91.437}, "duration_fraction": {"p25": 0.835915, "median": 0.871129, "p75": 0.91437}}
+  },
+  "production_policy_binding": {"evidence_label": "policy", "automatic_timeline_override": false, "instruction": "Use this envelope as descriptive benchmark context only. Do not silently convert quartiles or medians into mandatory cut points."},
+  "notes": [
+    "Multi-product/listicle rows are not training evidence and must remain excluded upstream.",
+    "The envelope preserves confirmed descriptive evidence; it does not confirm semantic truth or audio/Foley audibility.",
+    "Missing secondary-proof timing remains missing; observed_n reflects only directly evidenced values."
+  ]
+}
