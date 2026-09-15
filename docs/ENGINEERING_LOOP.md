@@ -35,13 +35,28 @@
 ### Commercial-license review
 - SAM2 remains eligible for future mask propagation: upstream code/checkpoints are Apache-2.0.
 - ProPainter remains excluded from production: upstream explicitly declares non-commercial-only use.
-- DiffuEraser is not production-eligible as published when using its ProPainter prior; its Apache-2.0 repository does not remove the upstream ProPainter restriction. It may only be reconsidered with a commercially clean replacement prior and full dependency audit.
-
-### Evidence / limitations
-- This loop establishes testable architecture, not removal-quality parity yet.
-- Local execution was attempted but the execution environment could not resolve github.com, so **no local pytest/benchmark result is claimed**.
-- CI was added so pushed commits can provide independent execution evidence; CI status must pass before promotion.
-- No model weights or non-commercial code were added.
+- DiffuEraser is not production-eligible as published when using its ProPainter prior; its Apache-2.0 repository does not remove the upstream ProPainter restriction.
 
 ### Promotion decision
 **DO NOT MERGE TO STABLE YET.** Keep on `feature/vmake-parity-core` until CI passes and real video fixtures/quality benchmarks exist.
+
+## Loop 011 — 2026-09-16
+
+### Repository audit and implementation
+- Audited the complete successor branch; it remains small with no duplicate/dead modules identified yet.
+- Added bounded QC escalation: failed Local Fast jobs move to Local Temporal, failed Local Temporal jobs move to Smart Pro, and failed Smart Pro jobs stop for manual review instead of looping or silently shipping a bad render.
+- Added four tests covering escalation order, failed fast escalation, terminal Smart Pro failure, and no retry after a passing QC result.
+
+### External review
+- Netflix VOID remains the cleanest hard-case candidate found: official GitHub/model are Apache-2.0, with Pass 2 intended to improve temporal consistency, but official guidance still targets 40GB+ VRAM.
+- LaMa Apache-2.0 ONNX/safetensors variants remain useful candidates for a cheap still-frame/local-fast baseline, but must be benchmarked for temporal flicker before adoption.
+- LTX-2.3 in/outpainting was reviewed but uses the LTX community license rather than Apache-2.0, so it was not adopted automatically.
+- MiniMax-Remover weights are CC-BY-NC-4.0 and remain excluded from production.
+- Hugging Face connector invocation failed in this run, so no dependency was adopted from an unverified connector result.
+
+### Evidence / limitations
+- Tests were added but no passing CI/local run is claimed in this loop.
+- Stable `main` remains unchanged until executable CI and video-quality evidence exist.
+
+### Promotion decision
+**KEEP ON DEVELOPMENT BRANCH.** Next highest-value slice is the actual job pipeline plus synthetic clean/overlay video fixtures and measurable QC.
