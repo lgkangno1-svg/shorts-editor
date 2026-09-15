@@ -1,0 +1,112 @@
+{
+  "sample_id": 1,
+  "video_id": "5DwcGCiBs70",
+  "title": "내가 뺏어먹는 와이프 최애음식ㅋㅋ",
+  "shorts_url": "https://www.youtube.com/shorts/5DwcGCiBs70",
+  "direct_visual_review": true,
+  "review_evidence": {
+    "hook_5fps_sheets": ["hook_5fps_01.jpg"],
+    "overview_1fps_sheets": ["overview_1fps_01.jpg", "overview_1fps_02.jpg"],
+    "scene_change_sheets": ["scene_changes_01.jpg", "scene_changes_02.jpg"],
+    "first_frame": "first_frame.jpg",
+    "manifest": "manifest.json",
+    "audio_spectrogram": "audio_spectrogram.png"
+  },
+  "duration_sec": 45.021,
+  "pacing": {
+    "scene_change_count": 47,
+    "scene_count_estimate": 48,
+    "avg_scene_duration_sec": 0.938,
+    "first_1s_changes": 2,
+    "first_3s_changes": 5,
+    "first_5s_changes": 7,
+    "detected_cut_times_sec": [0.4, 0.834, 1.268, 1.768, 2.269, 3.403, 4.838, 6.44, 7.14, 8.609, 9.142, 10.043, 11.411, 13.046, 13.08, 13.514, 14.314, 15.816, 16.55, 18.685, 20.454, 21.622, 22.055, 22.656, 23.323, 24.791, 25.292, 26.593, 26.994, 27.628, 29.997, 30.864, 31.465, 32.432, 33.4, 33.834, 34.935, 35.469, 36.57, 37.237, 38.772, 39.072, 40.174, 41.175, 41.475, 42.176, 43.177],
+    "rhythm_summary": "Fast Top-5 food montage. Direct sheets show five distinct diet/food items advancing by persistent 1/5 through 5/5 rank markers, with frequent hand/product/tasting reframes and an especially dense first five seconds."
+  },
+  "hook": {
+    "end_sec": 2.27,
+    "visual": "Immediate extreme close-up of a drink being poured into a glass, then abrupt food/person inserts before the first ranked item begins.",
+    "text": "First-frame red box begins with '내가'; the opening sequence quickly frames the narrator/person plus food before '먼저' introduces the ranking.",
+    "type": "personal-curiosity + ranked-list reveal",
+    "pattern_interrupt": "liquid-pour macro followed by rapid food/person cuts"
+  },
+  "stages": {
+    "product_first_visible_sec": null,
+    "reveal_sec": null,
+    "problem_sec": 0.0,
+    "first_demo_sec": 3.0,
+    "first_proof_sec": 6.0,
+    "main_payoff_sec": 43.0,
+    "cta_sec": null,
+    "ending_style": "5/5 final-food/tasting wrap without a visible conventional CTA"
+  },
+  "timeline_notes": [
+    "0.0-2.3s: curiosity hook with pour/food/person inserts and first ranking setup.",
+    "~3-12s: 1/5 food item; package/container, preparation and eating/result close-ups.",
+    "~13-22s: 2/5 ice-cream/cone item; package/freezer, cone close-ups and tasting reaction.",
+    "~23-29s: 3/5 bottled/chocolate-like drink item; package/prep and drinking reaction.",
+    "~30-36s: 4/5 coffee/protein-mix drink item; sachet-to-glass preparation and tasting.",
+    "~37-45s: 5/5 canned-food/meal item; can opening, serving, meal context and final eating shot."
+  ],
+  "visual_language": {
+    "dominant_framing": ["food/product macro close-up", "hands preparing/opening packaging", "medium-close tasting reaction"],
+    "camera_motion": ["cut-driven reframing", "handheld/package movement", "mostly fixed close-up viewpoints within individual inserts"],
+    "hands_face_product_balance": "Products/food and hands dominate; the male presenter appears intermittently for taste/reaction proof.",
+    "product_position_scale": "Each ranked item becomes large and central while active, but product identity changes across five unrelated foods."
+  },
+  "subtitles": {
+    "position": "mostly center/lower-center; rank marker upper-right",
+    "font_class": "bold Korean sans/gothic",
+    "relative_size": "small-to-medium body captions; larger ranking/transition words",
+    "weight": "bold",
+    "base_color": "white",
+    "highlight_colors": ["red", "yellow", "blue"],
+    "stroke_shadow": "black/dark outline or filled caption boxes",
+    "max_lines_observed": 2,
+    "replacement_rhythm": "short phrase-level replacements synchronized to each preparation/tasting beat; persistent 1/5-5/5 markers segment the list"
+  },
+  "first_frame_thumbnail": {
+    "composition": "Tight vertical macro: dark pouring vessel at top, stream and textured glass centered, neutral counter background.",
+    "text_position": "center over glass",
+    "text_color": "white Korean text inside a red rectangular box",
+    "product_position": "glass centered; pouring vessel upper-left/top",
+    "product_relative_scale": "very large close-up",
+    "human_or_hand": "no face; pouring action only",
+    "attention_device": "motion of liquid stream plus saturated red caption over neutral scene"
+  },
+  "audio": {
+    "direct_audio_listened": false,
+    "bgm_family": "unknown",
+    "bgm_energy": "unknown",
+    "tempo_bpm_estimate": null,
+    "edit_sfx": ["3 transient-energy candidates around 10.0s, 19.65s and 21.05s; type/audibility unverified"],
+    "foley": ["pouring, package handling, stirring/eating are visually plausible Foley sources but audibility is unverified"],
+    "vo_tts": {
+      "present": "unknown",
+      "gender_presentation": "unknown",
+      "tone": "unknown",
+      "pace": "unknown",
+      "pause_style": "unknown"
+    },
+    "audio_metric_evidence": {
+      "integrated_loudness_lufs": -11.4,
+      "loudness_range_lu": 1.5,
+      "rms_median_dbfs": -17.01,
+      "rms_p95_dbfs": -8.97,
+      "silence_pct_below_-38dbfs": 0.11,
+      "rough_energy_pulse_bpm_unverified": 85.7,
+      "energy_pulse_confidence": 0.036,
+      "transient_peak_count": 3
+    },
+    "uncertainty": "Audio was not directly listened to. The spectrogram is densely occupied for most of the short and level metrics show very little silence, but this cannot distinguish narration, BGM, SFX or Foley identity."
+  },
+  "content_summary": "A five-item diet/food ranking assembled from different packaged foods/drinks and tasting reactions. It counts for strict benchmark review but is not single-product training evidence.",
+  "single_product_training_decision": "exclude_multi_product_listicle",
+  "training_decision_evidence": "confirmed",
+  "confidence_notes": [
+    "Actual first-frame, hook-5fps, whole-video-1fps, scene-change sheets and audio spectrogram were directly inspected from MiniPC artifact 10109367625.",
+    "Rank markers 1/5 through 5/5 and visibly different food/product identities confirm multi-product listicle structure.",
+    "Audio characteristics beyond extracted metrics remain explicitly unverified."
+  ],
+  "reviewed_at": "2026-09-09T14:40:00Z"
+}
