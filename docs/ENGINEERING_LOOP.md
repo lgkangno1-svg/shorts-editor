@@ -134,3 +134,23 @@
 
 ### promotion decision
 **KEEP ON DEVELOPMENT BRANCH.** Next slice: executable video job orchestration and paired synthetic clean/overlay benchmark scoring.
+
+## Loop 016 — 2026-09-16
+
+### Repository audit and implementation
+- Added engine-neutral tracking-risk signals: minimum confidence plus maximum normalized center jump between consecutive samples. This gives SAM2/future trackers a fail-safe contract so abrupt drift or confidence collapse can trigger re-detection instead of contaminating inpainting masks.
+- Changed movement detection to use box centers rather than top-left coordinates, avoiding false motion when a tracker changes mask extent around a stationary target.
+- Added regression coverage for normal motion, confidence collapse, abrupt jumps and invalid thresholds.
+
+### External review
+- Hugging Face SAM2 video support confirms promptable video mask propagation/tracking; SAM2 checkpoints/code remain Apache-2.0 candidates.
+- Netflix VOID remains Apache-2.0 and suitable for routed hard cases.
+- Xiaomi SVOR is Apache-2.0 and worth future benchmark evaluation for imperfect-mask robustness, but no dependency was adopted without local quality/cost evidence.
+- DiffuEraser remains excluded from production in its published default configuration because it uses ProPainter as a prior and explicitly requires compliance with ProPainter licensing.
+
+### Evidence / limitations
+- The new tests are committed but no passing CI/local execution is claimed for this head; GitHub had no workflow run attached to the pre-change head when checked.
+- Stable `main` remains unchanged; objective video-quality benchmarking is still the promotion gate.
+
+### promotion decision
+**KEEP ON DEVELOPMENT BRANCH.** Next slice remains executable job orchestration plus paired synthetic video quality scoring.
