@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from math import hypot
 
 
 class TargetKind(str, Enum):
@@ -34,6 +35,10 @@ class BoundingBox:
     @property
     def area_ratio(self) -> float:
         return self.width * self.height
+
+    @property
+    def center(self) -> tuple[float, float]:
+        return (self.x + self.width / 2.0, self.y + self.height / 2.0)
 
 
 @dataclass(frozen=True)
@@ -71,10 +76,36 @@ class RemovalTrack:
         return sum(sample.confidence for sample in self.samples) / len(self.samples)
 
     @property
+    def min_confidence(self) -> float:
+        return min(sample.confidence for sample in self.samples)
+
+    @property
     def max_area_ratio(self) -> float:
         return max(sample.box.area_ratio for sample in self.samples)
 
+    def max_center_jump(self) -> float:
+        """Largest normalized center displacement between consecutive samples.
+
+        A large jump is a cheap tracker-failure signal. Consumers can route the
+        segment to re-detection/re-prompting instead of trusting a drifted mask.
+        """
+        if len(self.samples) < 2:
+            return 0.0
+        return max(
+            hypot(b.box.center[0] - a.box.center[0], b.box.center[1] - a.box.center[1])
+            for a, b in zip(self.samples, self.samples[1:])
+        )
+
+    def has_tracking_risk(
+        self, *, min_confidence: float = 0.5, max_center_jump: float = 0.25
+    ) -> bool:
+        if not 0.0 <= min_confidence <= 1.0:
+            raise ValueError("min_confidence must be in [0, 1]")
+        if max_center_jump < 0.0:
+            raise ValueError("max_center_jump must be >= 0")
+        return self.min_confidence < min_confidence or self.max_center_jump() > max_center_jump
+
     @property
     def is_moving(self) -> bool:
-        first = self.samples[0].box
-        return any((sample.box.x, sample.box.y) != (first.x, first.y) for sample in self.samples[1:])
+        first = self.samples[0].box.center
+        return any(sample.box.center != first for sample in self.samples[1:])
