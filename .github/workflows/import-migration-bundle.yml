@@ -1,0 +1,72 @@
+name: import-migration-bundle
+
+on:
+  push:
+    branches:
+      - migration/from-korea-concierge-20260915
+    paths:
+      - '.migration-bundle/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: migration/from-korea-concierge-20260915
+
+      - name: Reconstruct and validate migration bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .migration-bundle/SHA256
+          parts=$(find .migration-bundle -maxdepth 1 -type f -name 'part-*' | sort)
+          test -n "$parts"
+          cat $parts | base64 -d > /tmp/shorts-editor-export.tar.gz
+          expected=$(tr -d '[:space:]' < .migration-bundle/SHA256)
+          actual=$(sha256sum /tmp/shorts-editor-export.tar.gz | awk '{print $1}')
+          test "$expected" = "$actual"
+
+          rm -rf /tmp/shorts-editor-import
+          mkdir -p /tmp/shorts-editor-import
+          tar -C /tmp/shorts-editor-import -xzf /tmp/shorts-editor-export.tar.gz
+          src=/tmp/shorts-editor-import/shorts-editor-export
+          test -d "$src"
+
+          reviews=$(find "$src/youtube-shopping-shorts-benchmark/strict-frame-analysis/reviews" -maxdepth 1 -type f -name '*.json' | wc -l)
+          test "$reviews" -eq 102
+          test -f "$src/youtube-shopping-shorts-benchmark/single-product-engine/providers/smolvlm2_llamacpp_provider.py"
+          python3 -m py_compile "$src/youtube-shopping-shorts-benchmark/single-product-engine/providers/smolvlm2_llamacpp_provider.py"
+
+          python3 - "$src" <<'PY'
+          import csv, pathlib, sys
+          root = pathlib.Path(sys.argv[1])
+          data = root / 'youtube-shopping-shorts-benchmark/single-product-engine/data'
+          with (data / 'seed_event_timings.csv').open(encoding='utf-8', newline='') as f:
+              seeds = list(csv.DictReader(f))
+          assert len(seeds) == 12, len(seeds)
+          with (data / 'direct_review_adjudications.csv').open(encoding='utf-8', newline='') as f:
+              adjudications = {row['video_id']: row for row in csv.DictReader(f)}
+          for row in seeds:
+              adj = adjudications.get(row['video_id'])
+              assert adj is not None, row['video_id']
+              assert adj['training_decision'] == 'include_single_product', (row['video_id'], adj['training_decision'])
+              assert adj['evidence_label'] == 'confirmed', (row['video_id'], adj['evidence_label'])
+          print(f'validated reviews={102} confirmed_single_product_timings={len(seeds)}')
+          PY
+
+      - name: Replace migration branch with standalone repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          src=/tmp/shorts-editor-import/shorts-editor-export
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a "$src/." .
+          git config user.name 'shorts-editor migration'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: import standalone Shopping Shorts editor'
+          git push origin HEAD:migration/from-korea-concierge-20260915
