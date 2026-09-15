@@ -96,3 +96,22 @@
 
 ### promotion decision
 **KEEP ON DEVELOPMENT BRANCH.** Next slice: video job executor plus synthetic clean/overlay fixtures and objective quality scoring.
+
+## Loop 014 — 2026-09-16
+
+### Repository audit and implementation
+- Found `duration_seconds` was validated but ignored by routing, allowing arbitrarily long clips onto frame-local cleanup despite temporal drift risk.
+- Local Fast is now restricted to short (<=30s), simple jobs; otherwise easy long clips route to Local Temporal.
+- Added regression coverage for the long-clip route.
+
+### External review
+- Hugging Face metadata confirms Netflix VOID, ROSE and SVOR as Apache-2.0 candidates; VOID remains a high-VRAM hard-case option.
+- EffectErase is CC-BY-NC-4.0 and is excluded from commercial production.
+- No new model dependency was added without end-to-end upstream/base-model license review.
+
+### Evidence / limitations
+- Code and regression test are committed, but this new head has not yet been observed passing CI; no test-pass claim is made.
+- Stable `main` remains unchanged pending real video-quality benchmarks.
+
+### promotion decision
+**KEEP ON DEVELOPMENT BRANCH.** Next slice remains a real video executor plus synthetic paired-video quality benchmark.
