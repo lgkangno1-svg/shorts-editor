@@ -1,0 +1,61 @@
+name: import-standalone-transport
+
+on:
+  push:
+    branches: [migration/full-from-korea-20260916]
+    paths:
+      - '.migration-bundle-12k/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reassemble and verify transport bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .migration-bundle-12k/SHA256
+          test -f .migration-bundle-12k/READY
+          cat .migration-bundle-12k/part-* | base64 -d > /tmp/shorts-editor-export.tar.gz
+          expected=$(tr -d '[:space:]' < .migration-bundle-12k/SHA256)
+          actual=$(sha256sum /tmp/shorts-editor-export.tar.gz | awk '{print $1}')
+          test "$actual" = "$expected"
+          rm -rf /tmp/shorts-editor-export
+          tar -C /tmp -xzf /tmp/shorts-editor-export.tar.gz
+          test -d /tmp/shorts-editor-export/youtube-shopping-shorts-benchmark
+          test -f /tmp/shorts-editor-export/youtube-shopping-shorts-benchmark/single-product-engine/providers/smolvlm2_llamacpp_provider.py
+          reviews=$(find /tmp/shorts-editor-export/youtube-shopping-shorts-benchmark/strict-frame-analysis/reviews -maxdepth 1 -type f -name '*.json' | wc -l)
+          test "$reviews" -eq 102
+          python3 - <<'PY'
+          import csv, pathlib
+          root = pathlib.Path('/tmp/shorts-editor-export/youtube-shopping-shorts-benchmark/single-product-engine/data')
+          with (root / 'seed_event_timings.csv').open(encoding='utf-8', newline='') as f:
+              seeds = list(csv.DictReader(f))
+          assert len(seeds) == 12, len(seeds)
+          with (root / 'direct_review_adjudications.csv').open(encoding='utf-8', newline='') as f:
+              adj = {r['video_id']: r for r in csv.DictReader(f)}
+          for row in seeds:
+              a = adj[row['video_id']]
+              assert a['training_decision'] == 'include_single_product'
+              assert a['evidence_label'] == 'confirmed'
+          PY
+          python3 -m py_compile /tmp/shorts-editor-export/youtube-shopping-shorts-benchmark/single-product-engine/providers/smolvlm2_llamacpp_provider.py
+          printf '{\n  "bundle_sha256": "%s",\n  "strict_reviews": 102,\n  "confirmed_single_product_timings": 12,\n  "evidence_policy": "preserved",\n  "listicle_training_exclusion": "preserved"\n}\n' "$actual" > /tmp/shorts-editor-export/MIGRATION_VALIDATION.json
+
+      - name: Replace repository tree with verified standalone workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a /tmp/shorts-editor-export/. .
+          git config user.name 'shorts-editor migration'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: import standalone Shopping Shorts editor'
+          git push origin HEAD:migration/full-from-korea-20260916
