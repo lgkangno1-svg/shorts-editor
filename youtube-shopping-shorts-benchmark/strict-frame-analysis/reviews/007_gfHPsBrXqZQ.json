@@ -1,0 +1,106 @@
+{
+  "sample_id": 7,
+  "video_id": "gfHPsBrXqZQ",
+  "title": "✨️손님들이 신기해하는 우리집 비상템 Top5🚨",
+  "shorts_url": "https://www.youtube.com/shorts/gfHPsBrXqZQ",
+  "direct_visual_review": true,
+  "review_evidence": {
+    "hook_5fps_sheets": ["hook_5fps_01.jpg"],
+    "overview_1fps_sheets": ["overview_1fps_01.jpg", "overview_1fps_02.jpg"],
+    "scene_change_sheets": ["scene_changes_01.jpg", "scene_changes_02.jpg"],
+    "first_frame": "first_frame.jpg",
+    "manifest": "manifest.json",
+    "audio_spectrogram": "audio_spectrogram.png"
+  },
+  "duration_sec": 36.781,
+  "pacing": {
+    "scene_change_count": 36,
+    "scene_count_estimate": 37,
+    "avg_scene_duration_sec": 0.994,
+    "first_1s_changes": 1,
+    "first_3s_changes": 5,
+    "first_5s_changes": 6,
+    "detected_cut_times_sec": [0.534, 1.001, 1.401, 2.302, 2.736, 4.705, 7.808, 8.876, 9.91, 10.577, 11.111, 12.279, 13.046, 13.48, 14.047, 15.849, 17.017, 18.018, 19.152, 19.72, 20.821, 21.455, 23.257, 25.025, 25.926, 26.493, 27.461, 28.095, 29.196, 29.83, 30.731, 31.865, 32.232, 33.166, 33.6, 36.303],
+    "rhythm_summary": "Fast Top-5 household/emergency-item list. The first three seconds use five detected visual changes, then each numbered item receives roughly 4-9 seconds of close-up demonstration before an abrupt next-item transition."
+  },
+  "hook": {
+    "end_sec": 2.3,
+    "visual": "Extreme close-up of a blue-stem cotton-swab-like item, followed by an arm-use close-up and a quick transition into the first ranked item.",
+    "text": "Red-box Korean hook begins '손님들이' then '우리집 비상템'; 1/5 marker appears as the ranking starts.",
+    "type": "curiosity/social-proof + Top-5 utility list",
+    "pattern_interrupt": "unfamiliar object macro plus rapid skin-use demonstration"
+  },
+  "stages": {
+    "product_first_visible_sec": null,
+    "reveal_sec": null,
+    "problem_sec": 0.0,
+    "first_demo_sec": 2.0,
+    "first_proof_sec": 8.0,
+    "main_payoff_sec": 34.0,
+    "cta_sec": null,
+    "ending_style": "5/5 final emergency-item demonstration then hard '끝' wrap"
+  },
+  "timeline_notes": [
+    "0.0-2.3s: curiosity hook and '우리집 비상템' setup with unfamiliar swab-like object and skin close-ups.",
+    "~2-11s: 1/5 swab/tool item; object close-ups and apparent personal-use demonstration including ear-area application.",
+    "~12-16s: 2/5 circular patch/sticker item demonstrated on skin with a color-change/result close-up.",
+    "~17-23s: 3/5 wound-closure/skin-approximation strip demonstrated across a simulated or visible cut, then covered/pressed.",
+    "~24-28s: 4/5 compact patch/bandage item; package/device close-ups and skin application in bathroom/mirror context.",
+    "~29-36.8s: 5/5 bottled liquid applicator item; dropper/brush application to skin, water exposure/result close-up, then visual callback to emergency tools and '끝'."
+  ],
+  "visual_language": {
+    "dominant_framing": ["extreme object macro", "skin/hand close-up", "brief medium shot of presenter using item"],
+    "camera_motion": ["mostly cut-driven reframing", "small hand-held/object movement", "application-action close-ups"],
+    "hands_face_product_balance": "Hands and body-part application dominate; presenter face appears only for contextual proof/use shots.",
+    "product_position_scale": "Each ranked item is centered at macro scale while active; identity changes at every rank boundary."
+  },
+  "subtitles": {
+    "position": "mostly lower-center/center; rank marker upper-right",
+    "font_class": "bold Korean sans/gothic",
+    "relative_size": "medium short-phrase captions; large rank numerals",
+    "weight": "bold",
+    "base_color": "white",
+    "highlight_colors": ["red", "yellow", "black"],
+    "stroke_shadow": "black filled boxes/outline for body captions; yellow rank text with dark outline",
+    "max_lines_observed": 2,
+    "replacement_rhythm": "near shot-by-shot phrase replacement; persistent 1/5-5/5 marker anchors each item segment"
+  },
+  "first_frame_thumbnail": {
+    "composition": "Single blue-stem swab-like object diagonally fills a plain neutral background, with white material on the tip.",
+    "text_position": "lower-center over object tip",
+    "text_color": "white Korean text inside saturated red box",
+    "product_position": "diagonal center",
+    "product_relative_scale": "very large macro",
+    "human_or_hand": "fingertip barely visible at top edge; no face",
+    "attention_device": "unfamiliar object shape + stark red caption on minimal background"
+  },
+  "audio": {
+    "direct_audio_listened": false,
+    "bgm_family": "unknown",
+    "bgm_energy": "unknown",
+    "tempo_bpm_estimate": null,
+    "edit_sfx": ["5 transient-energy candidates around 3.6s, 4.45s, 15.6s, 22.6s and 25.15s; type/audibility unverified"],
+    "foley": ["package peeling, swab handling, skin application and water-contact events are visible Foley candidates; audibility unverified"],
+    "vo_tts": {"present": "unknown", "gender_presentation": "unknown", "tone": "unknown", "pace": "unknown", "pause_style": "unknown"},
+    "audio_metric_evidence": {
+      "integrated_loudness_lufs": -11.2,
+      "loudness_range_lu": 2.0,
+      "rms_median_dbfs": -17.06,
+      "rms_p95_dbfs": -9.08,
+      "silence_pct_below_-38dbfs": 0.14,
+      "rough_energy_pulse_bpm_unverified": 109.1,
+      "energy_pulse_confidence": 0.036,
+      "transient_peak_count": 5
+    },
+    "uncertainty": "Audio was not directly listened to. Dense spectrogram occupancy and very low measured silence indicate near-continuous program audio, but narration/BGM/SFX/Foley identity cannot be separated from these derived metrics."
+  },
+  "content_summary": "Five distinct household/emergency items are ranked and demonstrated in succession. It is valid strict benchmark evidence but is excluded from single-product training.",
+  "single_product_training_decision": "exclude_multi_product_listicle",
+  "training_decision_evidence": "confirmed",
+  "confidence_notes": [
+    "Actual first-frame, hook-5fps, whole-video-1fps, scene-change sheets and audio spectrogram were directly inspected from MiniPC artifact 10109367625.",
+    "Persistent 1/5 through 5/5 markers plus visibly different tools/patches/liquid products directly confirm a multi-product listicle.",
+    "Audio beyond extracted metrics remains unverified."
+  ],
+  "reviewed_at": "2026-09-09T14:41:00Z"
+}
