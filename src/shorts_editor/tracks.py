@@ -84,15 +84,26 @@ class RemovalTrack:
         return max(sample.box.area_ratio for sample in self.samples)
 
     def max_center_jump(self) -> float:
-        """Largest normalized center displacement between consecutive samples.
+        """Largest raw normalized displacement between sampled centers."""
+        if len(self.samples) < 2:
+            return 0.0
+        return max(
+            hypot(b.box.center[0] - a.box.center[0], b.box.center[1] - a.box.center[1])
+            for a, b in zip(self.samples, self.samples[1:])
+        )
 
-        A large jump is a cheap tracker-failure signal. Consumers can route the
-        segment to re-detection/re-prompting instead of trusting a drifted mask.
+    def max_center_velocity(self) -> float:
+        """Largest normalized center displacement per frame.
+
+        Trackers may emit sparse keyframes. Dividing displacement by the frame
+        gap avoids treating legitimate gradual motion between sparse samples as
+        a one-frame tracking jump.
         """
         if len(self.samples) < 2:
             return 0.0
         return max(
             hypot(b.box.center[0] - a.box.center[0], b.box.center[1] - a.box.center[1])
+            / (b.frame_index - a.frame_index)
             for a, b in zip(self.samples, self.samples[1:])
         )
 
@@ -103,7 +114,7 @@ class RemovalTrack:
             raise ValueError("min_confidence must be in [0, 1]")
         if max_center_jump < 0.0:
             raise ValueError("max_center_jump must be >= 0")
-        return self.min_confidence < min_confidence or self.max_center_jump() > max_center_jump
+        return self.min_confidence < min_confidence or self.max_center_velocity() > max_center_jump
 
     @property
     def is_moving(self) -> bool:
