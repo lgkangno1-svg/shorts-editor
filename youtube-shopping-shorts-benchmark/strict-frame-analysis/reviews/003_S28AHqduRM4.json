@@ -1,0 +1,43 @@
+{
+  "sample_id": 3,
+  "video_id": "S28AHqduRM4",
+  "title": "비싸도 굳이 사먹는 음식ㅋㅋ",
+  "shorts_url": "https://www.youtube.com/shorts/S28AHqduRM4",
+  "direct_visual_review": true,
+  "review_evidence": {
+    "hook_5fps_sheets": ["hook_5fps_01.jpg"],
+    "overview_1fps_sheets": ["overview_1fps_01.jpg", "overview_1fps_02.jpg"],
+    "scene_change_sheets": ["scene_changes_01.jpg", "scene_changes_02.jpg"],
+    "first_frame": "first_frame.jpg",
+    "manifest": "manifest.json"
+  },
+  "duration_sec": 36.621,
+  "scene_timeline": [
+    {"start_sec":0.0,"end_sec":5.1,"role":"hook","visual":"Macro sauce/food preparation montage; the item/ranking premise is established through rapid closeups.","framing":"extreme macro food close-up, top/oblique tabletop close-up","caption":"Narration-synced Korean captions/headlines visible; exact wording grounded by VTT where available.","transition":"hard_cut/jump_cut mix; grouped segment, exact automated cut times are stored in pacing.detected_cut_times_sec"},
+    {"start_sec":5.1,"end_sec":10.4,"role":"demo","visual":"Ranked food example: seaweed/rice and plated food closeups, hand-led preparation/proof imagery.","framing":"extreme macro food close-up, top/oblique tabletop close-up","caption":"Narration-synced Korean captions/headlines visible.","transition":"hard_cut/jump_cut mix"},
+    {"start_sec":10.4,"end_sec":17.6,"role":"demo","visual":"Next ranked item shifts to egg/sauce/rice preparation and close texture shots.","framing":"macro/tabletop close-up","caption":"Compact lower captions continue.","transition":"hard_cut/jump_cut mix"},
+    {"start_sec":17.6,"end_sec":24.5,"role":"demo","visual":"Another food item is introduced; packaging/ingredients and eating/serving visuals rotate quickly.","framing":"macro/package inserts","caption":"Phrase-level captions.","transition":"hard cuts"},
+    {"start_sec":24.5,"end_sec":31.2,"role":"proof","visual":"Prepared dishes and ingredient/result shots emphasize appetite and convenience.","framing":"food close-up","caption":"Narration-synced captions.","transition":"hard cuts"},
+    {"start_sec":31.2,"end_sec":36.621,"role":"payoff","visual":"Final ranking/item and finished-food payoff; montage finishes without a clearly visible dedicated CTA card.","framing":"food close-up","caption":"Final ranking/benefit phrases.","transition":"hard cuts"}
+  ],
+  "pacing": {
+    "scene_change_count": 40,
+    "avg_scene_duration_sec": 0.893,
+    "first_1s_changes": 2,
+    "first_3s_changes": 7,
+    "first_5s_changes": 10,
+    "detected_cut_times_sec": [0.033,0.533,1.067,1.1,1.8,2.533,2.567,3.2,3.233,4.067,5.1,7.4,9.833,10.433,11.0,12.8,13.433,14.0,14.033,15.733,16.6,17.6,19.2,21.967,22.733,24.133,24.5,25.3,26.167,27.833,29.233,30.733,31.233,32.1,32.933,33.3,33.767,34.7,35.533,36.067],
+    "rhythm_summary": "Very high early turnover: 10 detected visual changes by 5 s; overview and scene sheets confirm rapid food-detail replacement throughout."
+  },
+  "hook": {"end_sec":5.1,"visual":"Extreme macro food action: viscous dark sauce/liquid is squeezed/poured into a bowl, then the first seconds jump through glossy food-prep closeups and finished bites.","text":"비싸도 많이 팔리는 음식","type":"curiosity + ranked-list promise","pattern_interrupt":"sensory macro pour + immediate micro-cuts"},
+  "stages": {"product_first_visible_sec":0.0,"reveal_sec":null,"problem_sec":null,"first_demo_sec":5.1,"first_proof_sec":24.5,"main_payoff_sec":31.2,"cta_sec":null,"ending_style":"Montage/result wrap; no clearly dominant full-screen CTA card observed."},
+  "visual_language": {"dominant_framing":["extreme macro food close-up","top/oblique tabletop close-up","hand/product insert"],"camera_motion":["mostly handheld/static closeups","jump cuts","occasional hand-driven motion"],"hands_face_product_balance":"Food/product fills roughly 50–90% of frame; hands/tools enter edges; faces are essentially absent.","product_position_scale":"Food dominates center and lower center at large scale.","before_after":"No formal split-screen before/after; contrast is conveyed through process/result sequencing.","zoom_punch_in":"No reliable discrete digital zoom timing can be verified from still sheets; close framing changes are primarily cut-based."},
+  "subtitles": {"position":"lower-center over food","font_class":"bold sans/gothic","relative_size":"small-to-medium","weight":"bold","base_color":"white","highlight_colors":["red"],"stroke_shadow":"dark/contrasting edge visible on some frames","background_badges":"red rectangular keyword/title badges","max_lines_observed":2,"replacement_rhythm":"short phrase replacements keyed to narration/ranking"},
+  "first_frame_thumbnail": {"composition":"Extreme close-up dominates frame; pouring nozzle/stream enters over bowl/food. Small red caption badge sits around lower-center, leaving food texture as the main attention device.","text_position":"lower-center","text_color":"white with red highlight","product_position":"center/primary action area","product_relative_scale":"dominant macro","human_or_hand":"no face required; food/action leads","attention_device":"sensory macro pour + immediate micro-cuts"},
+  "audio": {"direct_audio_listened":false,"bgm_family":"unknown","bgm_energy":"unknown","tempo_bpm_estimate":null,"edit_sfx":["unverified: rapid cuts could carry pop/whoosh accents, but still images + EBU metrics cannot confirm them"],"foley":["unverified action candidates: pouring, utensil, package and food handling sounds"],"vo_tts":{"present":"likely","gender_presentation":"unknown","tone":"enthusiastic/informational suggested by VTT wording; not audibly verified","pace":"likely brisk from dense VTT cue replacement","pause_style":"unknown"},"audio_metric_evidence":{"integrated_loudness_lufs":-13.4,"loudness_range_lu":2.4,"true_peak_dbfs":0.8,"subtitle_vtt_available":true},"uncertainty":"Audio was not directly listened to. BGM identity/tempo, edit SFX, Foley audibility and voice timbre are not asserted."},
+  "title_content_relation":"Title premise matches a visually reviewed ranked-food recommendation montage.",
+  "content_summary":"High-velocity ranked food recommendation montage. Sensory texture + convenience + repeated item reveals drive the edit rather than one sustained single-product demonstration.",
+  "reusable_editing_rules":["Open on tactile/sensory macro action rather than a static packshot.","Front-load cuts: 10 detected changes by 5 s.","For list formats, switch item/benefit blocks every roughly 6–9 s while maintaining closeups.","Keep captions compact and away from core food texture."],
+  "confidence_notes":["Direct visual review completed from first-frame, hook 5fps, whole-video 1fps and scene-change contact sheets.","Detected cut times are supporting evidence, not a substitute for sheet review.","Exact font family and direct sound characteristics are intentionally not fabricated.","VTT was used only to ground wording/timing."],
+  "reviewed_at":"2026-09-08T19:55:00Z"
+}
