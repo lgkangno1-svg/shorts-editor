@@ -56,7 +56,7 @@
 - Tests were added but no passing CI/local run is claimed in this loop.
 - Stable `main` remains unchanged until executable CI and video-quality evidence exist.
 
-### Promotion decision
+### promotion decision
 **KEEP ON DEVELOPMENT BRANCH.** Next highest-value slice is the actual job pipeline plus synthetic clean/overlay video fixtures and measurable QC.
 
 ## Loop 012 — 2026-09-16
@@ -75,5 +75,24 @@
 - No passing local or CI run is claimed in this loop; tests were committed but execution evidence is still absent.
 - Stable `main` remains unchanged.
 
-### Promotion decision
+### promotion decision
 **KEEP ON DEVELOPMENT BRANCH.** Next slice: connect chunk planning to a real video job executor and add synthetic video fixtures/quality measurements.
+
+## Loop 013 — 2026-09-16
+
+### Repository audit and implementation
+- Verified the previous scene-aware branch head with GitHub Actions: the Python 3.10/3.12 CI workflow completed successfully.
+- Added safe padded-crop geometry for removal masks. Small corner subtitles/logos can now be planned as bounded crops instead of requiring full-frame inference, reducing expected compute while rejecting invalid/out-of-frame regions.
+- Added tests for frame-edge clipping, invalid regions, negative padding and crop-savings calculation.
+
+### External review
+- SAM 3 was reviewed but is not adopted automatically: upstream now uses a dedicated SAM License rather than Apache-2.0, so commercial eligibility must be reviewed explicitly before production use.
+- Apache-2.0 Hugging Face candidates for video inpainting/restoration were found, but model-card license metadata alone is insufficient evidence to add them as dependencies; upstream code/base-model terms must also be checked.
+- MiniMax-Remover remains excluded because its weights are non-commercial.
+
+### Evidence / limitations
+- Previous branch head CI is confirmed passing. The newly added crop tests are committed; their new CI run is not yet claimed as passing.
+- Stable `main` remains unchanged because real video-quality benchmarks are still missing.
+
+### promotion decision
+**KEEP ON DEVELOPMENT BRANCH.** Next slice: video job executor plus synthetic clean/overlay fixtures and objective quality scoring.
