@@ -15,6 +15,12 @@ def test_easy_job_stays_local_fast():
     assert route_cleanup(req()).engine is Engine.LOCAL_FAST
 
 
+def test_long_easy_job_uses_temporal_engine():
+    decision = route_cleanup(req(duration_seconds=90))
+    assert decision.engine is Engine.LOCAL_TEMPORAL
+    assert decision.reason == "long clip requires temporal consistency"
+
+
 def test_motion_routes_to_temporal():
     decision = route_cleanup(req(mask_area_ratio=0.15, motion_score=0.7, texture_score=0.5))
     assert decision.engine is Engine.LOCAL_TEMPORAL
