@@ -3,38 +3,45 @@
 ## Loop 008 — 2026-09-15
 
 ### Repository audit
-- Development branch currently contains only `README.md` and the Vmake-parity PRD; the actual Build 007/removal engine source is not present in this repository yet.
-- Because implementation source is absent, no production code cleanup, regression test, benchmark, or safe feature change can truthfully be performed in this loop.
-- Stable branch was therefore left unchanged.
+- Development branch contained only `README.md` and the Vmake-parity PRD; actual removal-engine source was absent.
+- Stable branch was left unchanged.
 
 ### External technique review
-- Netflix VOID remains the preferred production-grade hard-case candidate: official code/model is Apache-2.0 and supports Pass 1 + Pass 2 temporal refinement.
-- Official VOID guidance requires 40GB+ VRAM and up to 197-frame windows; this reinforces keeping it as a routed hard-case engine rather than the default path.
-- SAM2 remains a commercially usable tracking/segmentation candidate (Apache-2.0) for object/person/moving-overlay propagation.
-- ProPainter-based watermark-removal projects were reviewed only as architecture references and are excluded from the planned production engine because ProPainter's upstream license is non-commercial.
-- Hugging Face connector lookup failed transiently in this loop; no model was adopted from an unverified result.
-
-### Next safe gate
-1. Import/migrate the actual current Windows Build 007 source into this repository or a dedicated successor repository.
-2. Establish reproducible smoke tests and sample fixtures before refactoring.
-3. Fix Windows launcher/packaging first.
-4. Introduce a common `RemovalTrack` abstraction for subtitle/text and watermark/logo targets.
-5. Add fixed watermark MVP before moving-watermark propagation.
+- SAM2 remained a commercially usable tracking/segmentation candidate (Apache-2.0).
+- ProPainter-based implementations were excluded from production because upstream licensing is non-commercial.
 
 ### Promotion decision
-**NO CODE PROMOTION.** There is no implementation source in the repository to validate. Documentation/audit only.
+**NO CODE PROMOTION.** No executable implementation was available.
 
 ## Loop 009 — 2026-09-16
 
 ### Repository audit
-- Rechecked `feature/vmake-parity-prd`: it still contains only `README.md` and `docs/`; implementation source is still absent.
-- No benchmark or regression test was claimed or run because there is no executable project code in this repository.
-
-### Technique review
-- SAM2 video propagation remains a strong production candidate for moving watermark/logo/object masks; its model/code are Apache-2.0.
-- Reviewed recent watermark-removal projects for architecture ideas: shot-aware chunking, processing only a padded crop around a small watermark, mask dilation/feathering, audio passthrough, and measurable synthetic clean/watermarked twin fixtures are useful patterns.
-- ProPainter-dependent implementations remain reference-only because upstream commercial licensing is unsuitable for our production path.
-- A useful testing pattern was identified: generate paired clean + watermarked synthetic clips and score residue/tracking error rather than relying only on visual inspection. This should become the first benchmark harness once source is present.
+- Rechecked `feature/vmake-parity-prd`; implementation source was still absent.
+- No benchmark or regression test was claimed or run.
+- Synthetic clean/overlaid twin clips were selected as the future objective benchmark pattern.
 
 ### Promotion decision
-**DOCUMENTATION ONLY.** Stable code remains untouched until the real removal-engine source is present.
+**DOCUMENTATION ONLY.** Stable code remained untouched.
+
+## Loop 010 — 2026-09-16
+
+### Implemented on successor branch
+- Created `feature/vmake-parity-core` from the PRD branch rather than modifying stable `main`.
+- Added an installable Python core with deterministic cost-aware routing: easy jobs -> local fast, medium jobs -> local temporal, hard/uncertain-mask jobs -> Smart Pro.
+- Added fail-closed QC primitives for residuals, temporal flicker, mask boundaries and protected-region damage.
+- Added validation tests for routing, invalid inputs and QC safety gates.
+- Added GitHub Actions CI for Python 3.10 and 3.12.
+
+### Commercial-license review
+- SAM2 remains eligible for future mask propagation: upstream code/checkpoints are Apache-2.0.
+- ProPainter remains excluded from production: upstream explicitly declares non-commercial-only use.
+- DiffuEraser is not production-eligible as published when using its ProPainter prior; its Apache-2.0 repository does not remove the upstream ProPainter restriction. It may only be reconsidered with a commercially clean replacement prior and full dependency audit.
+
+### Evidence / limitations
+- This loop establishes testable architecture, not removal-quality parity yet.
+- Local execution was attempted but the execution environment could not resolve github.com, so **no local pytest/benchmark result is claimed**.
+- CI was added so pushed commits can provide independent execution evidence; CI status must pass before promotion.
+- No model weights or non-commercial code were added.
+
+### Promotion decision
+**DO NOT MERGE TO STABLE YET.** Keep on `feature/vmake-parity-core` until CI passes and real video fixtures/quality benchmarks exist.
