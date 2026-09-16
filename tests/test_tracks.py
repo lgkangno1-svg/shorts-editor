@@ -55,11 +55,25 @@ def test_tracking_risk_thresholds_are_validated():
         track.has_tracking_risk(max_center_velocity=-0.1)
     with pytest.raises(ValueError):
         track.has_tracking_risk(max_center_velocity=0.2, max_center_jump=0.2)
+    with pytest.raises(ValueError):
+        track.has_tracking_risk(min_confidence=float("nan"))
+    with pytest.raises(ValueError):
+        track.has_tracking_risk(max_center_velocity=float("inf"))
 
 
 def test_box_rejects_out_of_frame_region():
     with pytest.raises(ValueError):
         BoundingBox(0.95, 0.1, 0.1, 0.1)
+
+
+def test_tracking_inputs_reject_non_finite_values():
+    for value in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValueError):
+            BoundingBox(value, 0.1, 0.1, 0.1)
+        with pytest.raises(ValueError):
+            BoundingBox(0.1, 0.1, value, 0.1)
+        with pytest.raises(ValueError):
+            TrackSample(0, BoundingBox(0.1, 0.1, 0.1, 0.1), value)
 
 
 def test_track_rejects_duplicate_or_unsorted_frames():
