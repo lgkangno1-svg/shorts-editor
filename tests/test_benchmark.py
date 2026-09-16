@@ -83,6 +83,21 @@ def test_nonfinite_mask_is_rejected_instead_of_becoming_true():
         evaluate_paired_video(overlay, clean.copy(), clean, invalid)
 
 
+@pytest.mark.parametrize("invalid_value", [-1, 2, 0.5])
+def test_nonbinary_numeric_mask_is_rejected(invalid_value):
+    overlay, clean, mask = fixture_frames()
+    invalid = mask.astype(np.float32)
+    invalid[0, 0, 0] = invalid_value
+    with pytest.raises(ValueError, match="binary 0/1"):
+        evaluate_paired_video(overlay, clean.copy(), clean, invalid)
+
+
+def test_binary_numeric_mask_is_accepted():
+    overlay, clean, mask = fixture_frames()
+    result = evaluate_paired_video(overlay, clean.copy(), clean, mask.astype(np.uint8))
+    assert result.decision.passed is True
+
+
 def test_numpy_integer_radii_are_accepted():
     overlay, clean, mask = fixture_frames()
     result = evaluate_paired_video(overlay, clean.copy(), clean, mask, boundary_radius=np.int64(2), protected_margin=np.int32(2))
