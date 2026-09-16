@@ -2,6 +2,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from numbers import Real
+
+
+
+def _real_metric(value: object, name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise TypeError(f"{name} must be a real number")
+    result = float(value)
+    if not math.isfinite(result) or not 0.0 <= result <= 1.0:
+        raise ValueError(f"{name} must be finite and in [0, 1]")
+    return result
 
 
 @dataclass(frozen=True)
@@ -13,10 +24,7 @@ class QCMetrics:
 
     def __post_init__(self) -> None:
         for name, value in vars(self).items():
-            if isinstance(value, bool) or not isinstance(value, (int, float)):
-                raise TypeError(f"{name} must be a real numeric metric")
-            if not math.isfinite(value) or not 0.0 <= value <= 1.0:
-                raise ValueError(f"{name} must be finite and in [0, 1]")
+            _real_metric(value, name)
 
 
 @dataclass(frozen=True)
@@ -28,31 +36,27 @@ class QCDecision:
     def __post_init__(self) -> None:
         if type(self.passed) is not bool:
             raise ValueError("passed must be a boolean")
-        if isinstance(self.score, bool) or not isinstance(self.score, (int, float)):
-            raise ValueError("score must be a real number")
-        if not math.isfinite(self.score) or not 0.0 <= self.score <= 1.0:
-            raise ValueError("score must be finite and in [0, 1]")
+        _real_metric(self.score, "score")
         if not isinstance(self.reason, str) or not self.reason.strip():
             raise ValueError("reason must be a non-empty string")
 
 
 def evaluate_qc(metrics: QCMetrics, threshold: float = 0.72) -> QCDecision:
     """Fail closed: protected-region damage is weighted most heavily."""
-    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)):
-        raise TypeError("threshold must be a real number")
-    if not math.isfinite(threshold) or not 0.0 <= threshold <= 1.0:
-        raise ValueError("threshold must be finite and in [0, 1]")
+    if not isinstance(metrics, QCMetrics):
+        raise TypeError("metrics must be QCMetrics")
+    threshold_value = _real_metric(threshold, "threshold")
     penalty = (
-        0.30 * metrics.residual_score
-        + 0.25 * metrics.flicker_score
-        + 0.15 * metrics.boundary_score
-        + 0.30 * metrics.protected_damage_score
+        0.30 * float(metrics.residual_score)
+        + 0.25 * float(metrics.flicker_score)
+        + 0.15 * float(metrics.boundary_score)
+        + 0.30 * float(metrics.protected_damage_score)
     )
     score = round(1.0 - penalty, 4)
-    if metrics.protected_damage_score > 0.30:
+    if float(metrics.protected_damage_score) > 0.30:
         return QCDecision(False, score, "protected-region damage")
-    if metrics.residual_score > 0.45:
+    if float(metrics.residual_score) > 0.45:
         return QCDecision(False, score, "visible removal residual")
-    if score < threshold:
+    if score < threshold_value:
         return QCDecision(False, score, "aggregate quality below threshold")
     return QCDecision(True, score, "quality gate passed")
