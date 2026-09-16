@@ -2,6 +2,7 @@
 
 Date: 2026-09-16
 Branch: `feature/rapidocr-frame-adapter`
+Promotion: merged to `main` through PR #3
 
 ## Goal
 Replace the pluggable-only OCR boundary with a concrete, local RapidOCR 3.x adapter while preserving the precise-mask safety introduced in loop 030.
@@ -19,5 +20,9 @@ Replace the pluggable-only OCR boundary with a concrete, local RapidOCR 3.x adap
 - Adapter targets RapidOCR 3.x, with optional dependency `rapidocr>=3.9.2,<4`.
 - RapidOCR 3.9.2 is Apache-2.0 and supports Python 3.10/3.12.
 
-## Promotion gate
-Promote only after pull-request CI passes the full repository suite on Python 3.10 and 3.12. This loop validates the adapter boundary; it does not claim a full VSR real-video quality benchmark.
+## Evidence
+- PR #3 full repository CI passed on Python 3.10 and 3.12.
+- Tests cover line-vs-word geometry separation, confidence filtering, explicit coarse fallback, malformed geometry, mapping-style output, frame-shape inference, and NumPy float32 values matching RapidOCR output types.
+
+## Result
+**PROMOTED.** The OCR adapter boundary is now stable on `main`. This does not claim full VSR real-video quality parity; the next blocking evidence is reproducible real-video quality benchmarking.
