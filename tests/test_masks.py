@@ -20,3 +20,16 @@ def test_crop_savings_for_small_corner_region():
 def test_negative_padding_fails_closed():
     with pytest.raises(ValueError):
         expand_box(Box(1, 1, 5, 5), -1, 10, 10)
+
+
+def test_pixel_geometry_rejects_fractional_and_boolean_values():
+    with pytest.raises(TypeError):
+        Box(0.5, 1, 5, 5)
+    with pytest.raises(TypeError):
+        Box(False, 1, 5, 5)
+    with pytest.raises(TypeError):
+        expand_box(Box(1, 1, 5, 5), 0.5, 10, 10)
+    with pytest.raises(TypeError):
+        expand_box(Box(1, 1, 5, 5), 1, 10.5, 10)
+    with pytest.raises(TypeError):
+        crop_savings(Box(1, 1, 5, 5), True, 10)
