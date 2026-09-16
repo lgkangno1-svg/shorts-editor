@@ -1,3 +1,5 @@
+import pytest
+
 from shorts_editor.escalation import decide_escalation, next_engine
 from shorts_editor.qc import QCDecision
 from shorts_editor.routing import Engine
@@ -29,3 +31,14 @@ def test_passing_render_never_retries():
     decision = decide_escalation(Engine.LOCAL_FAST, qc)
     assert decision.retry is False
     assert decision.engine is Engine.LOCAL_FAST
+
+
+@pytest.mark.parametrize("current", ["local_fast", None, True, 0])
+def test_escalation_rejects_non_engine_inputs(current):
+    with pytest.raises(TypeError):
+        next_engine(current)
+
+
+def test_decide_escalation_rejects_non_qc_decision():
+    with pytest.raises(TypeError):
+        decide_escalation(Engine.LOCAL_FAST, {"passed": False, "score": 0.5})
