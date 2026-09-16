@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from importlib import import_module
 from math import isfinite
-from numbers import Real
+from numbers import Integral, Real
 
 from .qc import QCDecision, QCMetrics, evaluate_qc
 
@@ -29,9 +29,9 @@ class PairedBenchmarkResult:
                 raise TypeError(f"{name} must be a real number")
             if not isfinite(float(value)) or not 0.0 <= float(value) <= 1.0:
                 raise ValueError(f"{name} must be finite and in [0, 1]")
-        if isinstance(self.frame_count, bool) or not isinstance(self.frame_count, int):
+        if isinstance(self.frame_count, bool) or not isinstance(self.frame_count, Integral):
             raise TypeError("frame_count must be an integer")
-        if self.frame_count <= 0:
+        if int(self.frame_count) <= 0:
             raise ValueError("frame_count must be > 0")
 
 
@@ -52,11 +52,12 @@ def _positive_real(value: object, name: str) -> float:
 
 
 def _nonnegative_int(value: object, name: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
+    if isinstance(value, bool) or not isinstance(value, Integral):
         raise TypeError(f"{name} must be an integer")
-    if value < 0:
+    result = int(value)
+    if result < 0:
         raise ValueError(f"{name} must be >= 0")
-    return value
+    return result
 
 
 def _video_array(value: object, name: str):
@@ -77,6 +78,8 @@ def _mask_array(value: object, expected_shape: tuple[int, int, int]):
     array = np.asarray(value)
     if array.shape != expected_shape:
         raise ValueError("removal_mask must have shape [frames, height, width] matching the videos")
+    if array.dtype.kind in "fc" and not bool(np.isfinite(array).all()):
+        raise ValueError("removal_mask must contain only finite values")
     return array.astype(bool, copy=False)
 
 
@@ -115,15 +118,7 @@ def evaluate_paired_video(
     min_overlay_strength: float = 0.01,
     qc_threshold: float = 0.72,
 ) -> PairedBenchmarkResult:
-    """Score a removal candidate against clean reference frames.
-
-    ``overlay_frames`` contains the original video with the target overlay,
-    ``candidate_frames`` contains the removal output, and ``clean_frames`` is
-    the paired clean reference. ``removal_mask`` identifies pixels where the
-    overlay is expected. All metrics are normalized to [0, 1] and then passed
-    through the existing fail-closed QC gate.
-    """
-
+    """Score a removal candidate against clean reference frames."""
     np = _numpy()
     pixel_range = _positive_real(pixel_range, "pixel_range")
     boundary_radius = _nonnegative_int(boundary_radius, "boundary_radius")
@@ -151,35 +146,18 @@ def evaluate_paired_video(
 
     candidate_inside = float(np.mean(candidate_error[mask])) / pixel_range
     residual_score = round(min(1.0, max(0.0, candidate_inside / source_inside)), 4)
-
     expanded = _dilate_mask(mask, protected_margin)
-    protected = ~expanded
-    protected_damage_score = _score_distribution(candidate_error[protected], pixel_range)
-
-    boundary_expanded = _dilate_mask(mask, boundary_radius)
-    boundary_ring = boundary_expanded & ~mask
+    protected_damage_score = _score_distribution(candidate_error[~expanded], pixel_range)
+    boundary_ring = _dilate_mask(mask, boundary_radius) & ~mask
     boundary_score = _score_distribution(candidate_error[boundary_ring], pixel_range, percentile=90.0)
 
     if frame_count < 2:
         flicker_score = 0.0
     else:
-        candidate_delta = candidate[1:] - candidate[:-1]
-        clean_delta = clean[1:] - clean[:-1]
-        temporal_error = np.mean(np.abs(candidate_delta - clean_delta), axis=-1)
+        temporal_error = np.mean(np.abs((candidate[1:] - candidate[:-1]) - (clean[1:] - clean[:-1])), axis=-1)
         temporal_mask = mask[1:] | mask[:-1]
         flicker_score = _score_distribution(temporal_error[temporal_mask], pixel_range, percentile=90.0)
 
-    metrics = QCMetrics(
-        residual_score=residual_score,
-        flicker_score=flicker_score,
-        boundary_score=boundary_score,
-        protected_damage_score=protected_damage_score,
-    )
+    metrics = QCMetrics(residual_score, flicker_score, boundary_score, protected_damage_score)
     decision = evaluate_qc(metrics, threshold=qc_threshold)
-    return PairedBenchmarkResult(
-        metrics=metrics,
-        decision=decision,
-        source_overlay_strength=round(min(1.0, max(0.0, source_inside)), 4),
-        mask_coverage=round(float(np.mean(mask)), 6),
-        frame_count=frame_count,
-    )
+    return PairedBenchmarkResult(metrics, decision, round(min(1.0, max(0.0, source_inside)), 4), round(float(np.mean(mask)), 6), frame_count)
