@@ -23,6 +23,16 @@ class QCDecision:
     score: float
     reason: str
 
+    def __post_init__(self) -> None:
+        if type(self.passed) is not bool:
+            raise ValueError("passed must be a boolean")
+        if isinstance(self.score, bool) or not isinstance(self.score, (int, float)):
+            raise ValueError("score must be a real number")
+        if not math.isfinite(self.score) or not 0.0 <= self.score <= 1.0:
+            raise ValueError("score must be finite and in [0, 1]")
+        if not isinstance(self.reason, str) or not self.reason.strip():
+            raise ValueError("reason must be a non-empty string")
+
 
 def evaluate_qc(metrics: QCMetrics, threshold: float = 0.72) -> QCDecision:
     """Fail closed: protected-region damage is weighted most heavily."""
