@@ -93,12 +93,7 @@ class RemovalTrack:
         )
 
     def max_center_velocity(self) -> float:
-        """Largest normalized center displacement per frame.
-
-        Trackers may emit sparse keyframes. Dividing displacement by the frame
-        gap avoids treating legitimate gradual motion between sparse samples as
-        a one-frame tracking jump.
-        """
+        """Largest normalized center displacement per frame."""
         if len(self.samples) < 2:
             return 0.0
         return max(
@@ -108,13 +103,29 @@ class RemovalTrack:
         )
 
     def has_tracking_risk(
-        self, *, min_confidence: float = 0.5, max_center_jump: float = 0.25
+        self,
+        *,
+        min_confidence: float = 0.5,
+        max_center_velocity: float = 0.25,
+        max_center_jump: float | None = None,
     ) -> bool:
+        """Return whether a track should fail closed before destructive removal.
+
+        ``max_center_velocity`` is normalized center displacement per frame and is
+        the preferred threshold. ``max_center_jump`` is retained as a deprecated
+        compatibility alias so existing callers do not silently change behavior.
+        Supplying both thresholds is rejected because their units/intent would be
+        ambiguous at the call site.
+        """
         if not 0.0 <= min_confidence <= 1.0:
             raise ValueError("min_confidence must be in [0, 1]")
-        if max_center_jump < 0.0:
-            raise ValueError("max_center_jump must be >= 0")
-        return self.min_confidence < min_confidence or self.max_center_velocity() > max_center_jump
+        if max_center_jump is not None:
+            if max_center_velocity != 0.25:
+                raise ValueError("use only max_center_velocity; max_center_jump is a compatibility alias")
+            max_center_velocity = max_center_jump
+        if max_center_velocity < 0.0:
+            raise ValueError("max_center_velocity must be >= 0")
+        return self.min_confidence < min_confidence or self.max_center_velocity() > max_center_velocity
 
     @property
     def is_moving(self) -> bool:
