@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 
 @dataclass(frozen=True)
@@ -12,8 +13,8 @@ class QCMetrics:
 
     def __post_init__(self) -> None:
         for name, value in vars(self).items():
-            if not 0.0 <= value <= 1.0:
-                raise ValueError(f"{name} must be in [0, 1]")
+            if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be finite and in [0, 1]")
 
 
 @dataclass(frozen=True)
@@ -25,8 +26,8 @@ class QCDecision:
 
 def evaluate_qc(metrics: QCMetrics, threshold: float = 0.72) -> QCDecision:
     """Fail closed: protected-region damage is weighted most heavily."""
-    if not 0.0 <= threshold <= 1.0:
-        raise ValueError("threshold must be in [0, 1]")
+    if not math.isfinite(threshold) or not 0.0 <= threshold <= 1.0:
+        raise ValueError("threshold must be finite and in [0, 1]")
     penalty = (
         0.30 * metrics.residual_score
         + 0.25 * metrics.flicker_score
