@@ -13,6 +13,8 @@ class QCMetrics:
 
     def __post_init__(self) -> None:
         for name, value in vars(self).items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError(f"{name} must be a real numeric metric")
             if not math.isfinite(value) or not 0.0 <= value <= 1.0:
                 raise ValueError(f"{name} must be finite and in [0, 1]")
 
@@ -36,6 +38,8 @@ class QCDecision:
 
 def evaluate_qc(metrics: QCMetrics, threshold: float = 0.72) -> QCDecision:
     """Fail closed: protected-region damage is weighted most heavily."""
+    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)):
+        raise TypeError("threshold must be a real number")
     if not math.isfinite(threshold) or not 0.0 <= threshold <= 1.0:
         raise ValueError("threshold must be finite and in [0, 1]")
     penalty = (
