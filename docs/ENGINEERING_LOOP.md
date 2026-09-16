@@ -110,3 +110,9 @@
 - Global validation audit found temporal window counts accepted booleans and fractional values; Python could then fail later inside `range()` or silently treat `True` as one frame. `max_frames` and `overlap_frames` now require real integer frame counts and reject booleans.
 - Regression tests cover fractional/boolean window parameters. No local or CI pass is claimed for this new head; stable `main` remains unchanged.
 - Research refresh reconfirmed Apache-2.0 VOID and SVOR as commercial candidates. Recent ProPainter wrappers expose useful windowed/shot-aware/low-VRAM engineering patterns, but their ProPainter dependency remains excluded from the production model path because upstream licensing is separate/non-commercial.
+
+## Loop 023 — 2026-09-16
+- Global frame-index audit found the same type-safety gap in scene-aware chunking: fractional frame counts/cuts could fail late in arithmetic/range operations, while booleans were silently accepted as integer frame indices.
+- `FrameChunk` boundaries and `plan_chunks` frame counts, limits, and scene-cut indices now reject booleans and non-integers up front; regression coverage was added for each class.
+- Research refresh: Netflix VOID and Xiaomi SVOR remain Apache-2.0 commercial candidates. VOID's interaction-aware quadmask/two-pass refinement remains a Smart-Pro candidate rather than a local default because the official model card recommends 40GB+ VRAM. MiniMax-Remover remains excluded because its weights are CC-BY-NC-4.0. DiffuEraser remains unsuitable for the commercial default while its published pipeline depends on ProPainter licensing.
+- No local or CI pass is claimed for this new head. `main` remains unchanged pending green CI and objective paired-video benchmarks.
