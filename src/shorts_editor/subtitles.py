@@ -50,12 +50,12 @@ class SubtitleConsensusConfig:
     """Conservative geometry/temporal gates for OCR subtitle consensus.
 
     These defaults deliberately avoid a hard-coded bottom strip: captions may be
-    above lower-thirds or UI. Position contributes to ranking, while temporal
-    support and confidence are the primary evidence.
+    near the top, above lower-thirds or UI. Position contributes to ranking,
+    while temporal support and confidence are the primary evidence.
     """
 
     min_confidence: float = 0.45
-    min_center_y: float = 0.28
+    min_center_y: float = 0.03
     max_center_y: float = 0.98
     max_box_height: float = 0.24
     line_center_tolerance: float = 0.035
