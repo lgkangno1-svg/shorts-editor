@@ -27,3 +27,15 @@ def test_context_contains_emit():
 def test_excessive_overlap_fails_closed():
     with pytest.raises(ValueError):
         plan_processing_windows(FrameChunk(0, 10), max_frames=8, overlap_frames=4)
+
+
+def test_window_frame_counts_reject_fractional_and_boolean_values():
+    chunk = FrameChunk(0, 10)
+    with pytest.raises(TypeError):
+        plan_processing_windows(chunk, max_frames=8.5, overlap_frames=2)
+    with pytest.raises(TypeError):
+        plan_processing_windows(chunk, max_frames=True, overlap_frames=0)
+    with pytest.raises(TypeError):
+        plan_processing_windows(chunk, max_frames=8, overlap_frames=1.5)
+    with pytest.raises(TypeError):
+        plan_processing_windows(chunk, max_frames=8, overlap_frames=False)
