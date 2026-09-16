@@ -7,8 +7,9 @@ import os
 from pathlib import Path
 import subprocess
 from tempfile import TemporaryDirectory
-from typing import Mapping
+from typing import Mapping, Sequence
 
+from .precision_masks import PreciseMaskPolygon, precise_masks_to_vsr_corrections
 from .routing import Engine
 from .tracks import RemovalTrack, TargetKind
 
@@ -23,9 +24,9 @@ class LocalVSRMode(str):
 class VSRRunnerConfig:
     """Configuration for the MIT-licensed VideoSubtitleRemover local CLI.
 
-    The runner is deliberately external: this project does not vendor VSR or
-    its optional model stack. A reviewed local VSR checkout/runtime can be
-    upgraded independently while this core owns routing, tracks and QC.
+    Coarse consensus tracks are guidance-only by default. Turning them into
+    destructive masks requires ``coarse_track_mask=True`` because real-video
+    fixtures showed that subtitle-line rectangles can smear foreground detail.
     """
 
     argv_prefix: tuple[str, ...]
@@ -36,6 +37,9 @@ class VSRRunnerConfig:
     detection_engine: str = "rapidocr"
     quality_report: bool = True
     verify_removal: bool = True
+    coarse_track_mask: bool = False
+    temporal_mask_union: bool = False
+    temporal_mask_window: int = 3
 
     def __post_init__(self) -> None:
         if not self.argv_prefix or any(not isinstance(arg, str) or not arg.strip() for arg in self.argv_prefix):
@@ -50,8 +54,13 @@ class VSRRunnerConfig:
             raise ValueError("crf must be an integer in [0, 51]")
         if not isinstance(self.detection_engine, str) or not self.detection_engine.strip():
             raise ValueError("detection_engine must be a non-empty string")
-        if type(self.quality_report) is not bool or type(self.verify_removal) is not bool:
-            raise TypeError("quality_report and verify_removal must be booleans")
+        for name in ("quality_report", "verify_removal", "coarse_track_mask", "temporal_mask_union"):
+            if type(getattr(self, name)) is not bool:
+                raise TypeError(f"{name} must be a boolean")
+        if isinstance(self.temporal_mask_window, bool) or not isinstance(self.temporal_mask_window, int):
+            raise TypeError("temporal_mask_window must be an integer")
+        if self.temporal_mask_window < 1 or self.temporal_mask_window > 15:
+            raise ValueError("temporal_mask_window must be in [1, 15]")
 
 
 @dataclass(frozen=True)
@@ -104,7 +113,11 @@ def track_to_vsr_keyframes(
     fps: float,
     max_keyframes: int = 240,
 ) -> list[dict[str, object]]:
-    """Convert a normalized overlay track to VSR's moving-region schema."""
+    """Convert a normalized overlay track to VSR's moving-region schema.
+
+    This schema is destructive in VSR. Callers should normally leave
+    ``coarse_track_mask`` disabled and prefer fine mask polygons instead.
+    """
     if not isinstance(track, RemovalTrack):
         raise TypeError("track must be a RemovalTrack")
     if track.kind not in (TargetKind.SUBTITLE, TargetKind.TEXT, TargetKind.WATERMARK, TargetKind.LOGO):
@@ -137,28 +150,48 @@ def build_vsr_config_overlay(
     config: VSRRunnerConfig,
     *,
     track: RemovalTrack | None = None,
+    precise_masks: Sequence[PreciseMaskPolygon] | None = None,
     frame_width: int | None = None,
     frame_height: int | None = None,
     fps: float | None = None,
 ) -> dict[str, object]:
+    """Build a local VSR overlay without broad destructive masks by default."""
     if not isinstance(config, VSRRunnerConfig):
         raise TypeError("config must be VSRRunnerConfig")
     overlay: dict[str, object] = {
         "detection_engine": config.detection_engine,
         "quality_report": config.quality_report,
         "verify_removal": config.verify_removal,
+        "temporal_mask_union": config.temporal_mask_union,
+        "temporal_mask_window": config.temporal_mask_window,
     }
-    if track is not None:
-        if frame_width is None or frame_height is None or fps is None:
-            raise ValueError("frame_width, frame_height and fps are required with a track")
+
+    needs_geometry = (track is not None and config.coarse_track_mask) or precise_masks is not None
+    if needs_geometry and (frame_width is None or frame_height is None or fps is None):
+        raise ValueError("frame_width, frame_height and fps are required with removal geometry")
+
+    if track is not None and config.coarse_track_mask:
         keyframes = track_to_vsr_keyframes(
             track,
-            frame_width=frame_width,
-            frame_height=frame_height,
-            fps=fps,
+            frame_width=frame_width,  # type: ignore[arg-type]
+            frame_height=frame_height,  # type: ignore[arg-type]
+            fps=fps,  # type: ignore[arg-type]
         )
         overlay["subtitle_region_keyframes"] = [{"keyframes": keyframes}]
         overlay["sttn_skip_detection"] = True
+
+    if precise_masks is not None:
+        corrections = precise_masks_to_vsr_corrections(
+            precise_masks,
+            frame_width=frame_width,  # type: ignore[arg-type]
+            frame_height=frame_height,  # type: ignore[arg-type]
+            fps=fps,  # type: ignore[arg-type]
+        )
+        if corrections:
+            overlay["manual_mask_corrections"] = corrections
+        # Deliberately do not set sttn_skip_detection: OCR remains active to
+        # catch glyphs missed by the precise detector.
+
     return overlay
 
 
@@ -245,6 +278,7 @@ def run_vsr_local(
     output_path: str,
     engine: Engine,
     track: RemovalTrack | None = None,
+    precise_masks: Sequence[PreciseMaskPolygon] | None = None,
     frame_width: int | None = None,
     frame_height: int | None = None,
     fps: float | None = None,
@@ -256,6 +290,7 @@ def run_vsr_local(
     overlay = build_vsr_config_overlay(
         config,
         track=track,
+        precise_masks=precise_masks,
         frame_width=frame_width,
         frame_height=frame_height,
         fps=fps,
