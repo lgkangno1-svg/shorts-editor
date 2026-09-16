@@ -60,14 +60,25 @@ def test_single_frame_scene_text_is_rejected_by_support_gate():
     assert detect_subtitle_tracks(detections) == ()
 
 
-def test_config_can_support_upper_captions_without_bottom_strip_assumption():
+def test_default_supports_top_captions_and_config_can_exclude_them():
     detections = [
-        det(0, 0.20, 0.20, 0.60, 0.06, text="a"),
-        det(5, 0.20, 0.20, 0.60, 0.06, text="b"),
+        det(0, 0.20, 0.055, 0.60, 0.05, text="a"),
+        det(5, 0.20, 0.055, 0.60, 0.05, text="b"),
     ]
-    assert best_subtitle_track(detections) is None
-    cfg = SubtitleConsensusConfig(min_center_y=0.1)
-    assert best_subtitle_track(detections, cfg) is not None
+    assert best_subtitle_track(detections) is not None
+    cfg = SubtitleConsensusConfig(min_center_y=0.10)
+    assert best_subtitle_track(detections, cfg) is None
+
+
+def test_real_fixture_style_top_title_and_changing_line_are_detectable():
+    detections = []
+    for frame, text in [(0, "내 자리 보고 감격함"), (5, "자리에서 눈치 엄청 봄"), (10, "대답 거의 로봇임")]:
+        detections.append(det(frame, 0.13, 0.045, 0.30, 0.04, 0.94, text="첫 출근 특징"))
+        detections.append(det(frame, 0.17, 0.095, 0.66, 0.05, 0.91, text=text))
+    best = best_subtitle_track(detections)
+    assert best is not None
+    assert best.track.samples[0].box.y < 0.05
+    assert best.track.samples[0].box.height > 0.08
 
 
 def test_densify_fills_only_short_gaps():
