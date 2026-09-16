@@ -81,9 +81,21 @@ def test_qc_rejects_non_finite_metrics(value):
         QCMetrics(value, 0.01, 0.01, 0.01)
 
 
+@pytest.mark.parametrize("value", [True, False, "0.1", None])
+def test_qc_rejects_boolean_or_nonnumeric_metrics(value):
+    with pytest.raises(TypeError):
+        QCMetrics(value, 0.01, 0.01, 0.01)
+
+
 def test_qc_rejects_non_finite_threshold():
     with pytest.raises(ValueError):
         evaluate_qc(QCMetrics(0.01, 0.01, 0.01, 0.01), threshold=float("nan"))
+
+
+@pytest.mark.parametrize("value", [True, False, "0.72", None])
+def test_qc_rejects_boolean_or_nonnumeric_threshold(value):
+    with pytest.raises(TypeError):
+        evaluate_qc(QCMetrics(0.01, 0.01, 0.01, 0.01), threshold=value)
 
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf"), -0.1, 1.1, True])
