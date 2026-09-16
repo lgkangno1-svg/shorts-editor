@@ -11,6 +11,9 @@ class Box:
     y2: int
 
     def __post_init__(self) -> None:
+        values = (self.x1, self.y1, self.x2, self.y2)
+        if any(isinstance(value, bool) or not isinstance(value, int) for value in values):
+            raise TypeError("box coordinates must be integer pixel indices")
         if min(self.x1, self.y1) < 0 or self.x2 <= self.x1 or self.y2 <= self.y1:
             raise ValueError("box must satisfy non-negative x1/y1 and x2>x1, y2>y1")
 
@@ -21,6 +24,10 @@ class Box:
 
 def expand_box(box: Box, padding: int, frame_width: int, frame_height: int) -> Box:
     """Pad a removal region while clipping it to the frame."""
+    if isinstance(padding, bool) or not isinstance(padding, int):
+        raise TypeError("padding must be an integer pixel count")
+    if any(isinstance(value, bool) or not isinstance(value, int) for value in (frame_width, frame_height)):
+        raise TypeError("frame dimensions must be integer pixel counts")
     if padding < 0:
         raise ValueError("padding must be >= 0")
     if frame_width <= 0 or frame_height <= 0:
@@ -38,6 +45,8 @@ def expand_box(box: Box, padding: int, frame_width: int, frame_height: int) -> B
 
 def crop_savings(box: Box, frame_width: int, frame_height: int) -> float:
     """Fraction of pixels avoided when processing only this crop."""
+    if any(isinstance(value, bool) or not isinstance(value, int) for value in (frame_width, frame_height)):
+        raise TypeError("frame dimensions must be integer pixel counts")
     if frame_width <= 0 or frame_height <= 0:
         raise ValueError("frame dimensions must be > 0")
     if box.x2 > frame_width or box.y2 > frame_height:
