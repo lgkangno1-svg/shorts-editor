@@ -49,3 +49,14 @@ def test_qc_fails_protected_damage_even_if_other_metrics_are_good():
 def test_qc_fails_large_residual():
     result = evaluate_qc(QCMetrics(0.46, 0.01, 0.01, 0.01))
     assert not result.passed
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_qc_rejects_non_finite_metrics(value):
+    with pytest.raises(ValueError):
+        QCMetrics(value, 0.01, 0.01, 0.01)
+
+
+def test_qc_rejects_non_finite_threshold():
+    with pytest.raises(ValueError):
+        evaluate_qc(QCMetrics(0.01, 0.01, 0.01, 0.01), threshold=float("nan"))
