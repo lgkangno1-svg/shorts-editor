@@ -99,3 +99,9 @@
 - Routing now rejects NaN and infinities for every normalized signal and duration before engine selection; regression tests cover both signal and duration inputs.
 - Research refresh: Netflix VOID and Xiaomi SVOR remain Apache-2.0 commercial candidates; MiniMax-Remover weights remain excluded (CC-BY-NC-4.0). EffectErase and D2DF are promising 2026 candidates but require dependency/license-chain and paired-video benchmarking before production adoption.
 - No local or CI pass is claimed for this head. `main` remains unchanged pending objective video benchmarks and green CI.
+
+## Loop 021 — 2026-09-16
+- Global fail-closed audit found non-finite validation gaps in tracking: NaN bounding-box coordinates/sizes and NaN confidence could pass Python range checks; non-finite risk thresholds could also weaken the destructive-edit guard.
+- Bounding boxes, track confidence, and tracking-risk thresholds now reject NaN/infinities. Regression coverage was added for each input class.
+- Research refresh: VOID and SVOR remain Apache-2.0 candidates. D2DF is Apache-2.0 but its draft-guided mode acknowledges ProPainter, so dependency-path isolation is required; EffectErase uses SAM2.1 masks and remains research-only until its full dependency/weight license chain is verified. MiniMax-Remover weights remain excluded as CC-BY-NC-4.0.
+- No local or CI pass is claimed for this head. `main` remains unchanged pending green CI and paired-video benchmarks.
