@@ -105,3 +105,8 @@
 - Bounding boxes, track confidence, and tracking-risk thresholds now reject NaN/infinities. Regression coverage was added for each input class.
 - Research refresh: VOID and SVOR remain Apache-2.0 candidates. D2DF is Apache-2.0 but its draft-guided mode acknowledges ProPainter, so dependency-path isolation is required; EffectErase uses SAM2.1 masks and remains research-only until its full dependency/weight license chain is verified. MiniMax-Remover weights remain excluded as CC-BY-NC-4.0.
 - No local or CI pass is claimed for this head. `main` remains unchanged pending green CI and paired-video benchmarks.
+
+## Loop 022 — 2026-09-16
+- Global validation audit found temporal window counts accepted booleans and fractional values; Python could then fail later inside `range()` or silently treat `True` as one frame. `max_frames` and `overlap_frames` now require real integer frame counts and reject booleans.
+- Regression tests cover fractional/boolean window parameters. No local or CI pass is claimed for this new head; stable `main` remains unchanged.
+- Research refresh reconfirmed Apache-2.0 VOID and SVOR as commercial candidates. Recent ProPainter wrappers expose useful windowed/shot-aware/low-VRAM engineering patterns, but their ProPainter dependency remains excluded from the production model path because upstream licensing is separate/non-commercial.
