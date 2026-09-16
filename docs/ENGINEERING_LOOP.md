@@ -88,3 +88,8 @@
 
 ### promotion decision
 **KEEP ON DEVELOPMENT BRANCH.**
+
+## Loop 019 — 2026-09-16
+- Fixed a fail-open QC defect: NaN metric/threshold values previously bypassed range comparisons and could produce a passing decision. QC now rejects all non-finite inputs; regression tests cover NaN and infinities.
+- External review reconfirmed Apache-2.0 VOID/SVOR as candidates and ProPainter-dependent paths as unsuitable for the commercial default. BeyondMasks/CORE is a promising 2026 paired object-removal benchmark/evaluator to assess before adoption.
+- Changes are committed only on `feature/vmake-parity-core`; no local/CI pass is claimed for this head and `main` remains unchanged.
