@@ -25,8 +25,12 @@ class CleanupRequest:
     def __post_init__(self) -> None:
         for name in ("mask_area_ratio", "motion_score", "texture_score", "occlusion_score", "mask_confidence"):
             value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError(f"{name} must be a real numeric signal")
             if not math.isfinite(value) or not 0.0 <= value <= 1.0:
                 raise ValueError(f"{name} must be finite and in [0, 1]")
+        if isinstance(self.duration_seconds, bool) or not isinstance(self.duration_seconds, (int, float)):
+            raise TypeError("duration_seconds must be a real numeric duration")
         if not math.isfinite(self.duration_seconds) or self.duration_seconds <= 0:
             raise ValueError("duration_seconds must be finite and > 0")
 
