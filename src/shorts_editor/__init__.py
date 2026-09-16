@@ -1,6 +1,12 @@
 """Video cleanup core."""
 
 from .local_vsr import VSRRunnerConfig, run_vsr_local
+from .ocr_adapters import (
+    OCRFrameAdapterResult,
+    adapt_rapidocr_output,
+    create_rapidocr_engine,
+    run_rapidocr_frame,
+)
 from .precision_masks import (
     PreciseMaskPolygon,
     dedupe_precise_masks,
@@ -21,17 +27,21 @@ __all__ = [
     "CleanupRequest",
     "Engine",
     "OCRDetection",
+    "OCRFrameAdapterResult",
     "PreciseMaskPolygon",
     "RouteDecision",
     "SubtitleConsensusConfig",
     "SubtitleTrackCandidate",
     "VSRRunnerConfig",
+    "adapt_rapidocr_output",
     "best_subtitle_track",
+    "create_rapidocr_engine",
     "dedupe_precise_masks",
     "detect_subtitle_tracks",
     "precise_masks_to_vsr_corrections",
     "rectangle_mask_polygon",
     "refine_subtitle_track",
     "route_cleanup",
+    "run_rapidocr_frame",
     "run_vsr_local",
 ]
