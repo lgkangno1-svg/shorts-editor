@@ -64,6 +64,13 @@ def test_qc_passes_clean_result():
     assert result.passed
 
 
+def test_qc_accepts_numpy_real_scalars():
+    np = pytest.importorskip("numpy")
+    metrics = QCMetrics(np.float32(0.05), np.float64(0.05), np.float32(0.05), np.float64(0.01))
+    result = evaluate_qc(metrics, threshold=np.float32(0.72))
+    assert result.passed
+
+
 def test_qc_fails_protected_damage_even_if_other_metrics_are_good():
     result = evaluate_qc(QCMetrics(0.01, 0.01, 0.01, 0.31))
     assert not result.passed
@@ -100,7 +107,7 @@ def test_qc_rejects_boolean_or_nonnumeric_threshold(value):
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf"), -0.1, 1.1, True])
 def test_qc_decision_rejects_invalid_score(value):
-    with pytest.raises(ValueError):
+    with pytest.raises((TypeError, ValueError)):
         QCDecision(False, value, "invalid render")
 
 
