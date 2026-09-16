@@ -66,19 +66,25 @@
 - New tests committed; stable unchanged.
 
 ## Loop 017 — 2026-09-16
+- Fixed sparse-keyframe tracking risk by measuring normalized center displacement per frame rather than raw sample-to-sample displacement.
+- Regression coverage added; no new-head CI pass claimed.
+
+## Loop 018 — 2026-09-16
 
 ### Repository audit and implementation
-- Found tracking-risk logic treated displacement between sparse keyframes as if it occurred in one frame. A valid target moving gradually over ten frames could therefore be falsely classified as tracker drift and trigger unnecessary re-detection/escalation.
-- Added `max_center_velocity()` and changed risk gating to normalized displacement per frame while retaining raw `max_center_jump()` for diagnostics.
-- Added regression coverage proving a 0.4 normalized displacement over ten frames is treated as 0.04/frame rather than an abrupt 0.4-frame jump.
+- Found an API-semantics defect left by Loop 017: `has_tracking_risk(max_center_jump=...)` was still named as a raw-jump threshold even though the implementation compared per-frame velocity. This could cause future callers to configure a threshold in the wrong units and weaken the destructive-edit fail-safe.
+- Introduced explicit `max_center_velocity` as the preferred threshold and retained `max_center_jump` only as a compatibility alias. Supplying both is rejected rather than guessed.
+- Added regression coverage for the new keyword, legacy compatibility, sparse-keyframe behavior, and ambiguous dual-threshold calls.
 
 ### External review
-- Hugging Face connector model search failed during this loop, so no model was adopted from unverified metadata.
-- Existing commercial-policy gate remains unchanged: SAM2/VOID/SVOR are candidates pending benchmarks; non-commercial ProPainter-derived production paths remain excluded.
+- SAM2 remains Apache-2.0 and suitable for future video mask propagation.
+- Netflix VOID remains Apache-2.0 and a high-quality hard-case candidate, but its 40GB+ class GPU requirement keeps it out of the default local path.
+- CLEAR and LTX2.3-ICEdit-Insight surfaced as Apache-2.0 subtitle/watermark restoration candidates; they are research candidates only until upstream provenance, runtime cost, and paired-video quality are benchmarked.
+- MiniMax-Remover weights are CC-BY-NC-4.0 and therefore excluded from production despite Apache-2.0 source code.
 
 ### Evidence / limitations
-- Code and regression test are committed. No passing local/CI execution is claimed for this new head yet.
-- Stable `main` remains unchanged pending CI and objective paired-video quality benchmarks.
+- Source and tests were committed on `feature/vmake-parity-core`. No local or CI pass is claimed for this new head.
+- Stable `main` remains unchanged; objective paired clean/overlay video benchmarks are still required before promotion.
 
 ### promotion decision
-**KEEP ON DEVELOPMENT BRANCH.** Next highest-value gate remains executable paired clean/overlay video benchmarking plus objective quality scoring.
+**KEEP ON DEVELOPMENT BRANCH.**
