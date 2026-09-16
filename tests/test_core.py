@@ -41,9 +41,21 @@ def test_routing_rejects_non_finite_normalized_signals(value):
         req(motion_score=value)
 
 
+@pytest.mark.parametrize("value", [True, False, "0.5", None])
+def test_routing_rejects_boolean_or_nonnumeric_normalized_signals(value):
+    with pytest.raises(TypeError):
+        req(motion_score=value)
+
+
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
 def test_routing_rejects_non_finite_duration(value):
     with pytest.raises(ValueError):
+        req(duration_seconds=value)
+
+
+@pytest.mark.parametrize("value", [True, False, "10", None])
+def test_routing_rejects_boolean_or_nonnumeric_duration(value):
+    with pytest.raises(TypeError):
         req(duration_seconds=value)
 
 
