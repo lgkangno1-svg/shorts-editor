@@ -10,7 +10,7 @@
 - SAM2 remained a commercially usable tracking/segmentation candidate (Apache-2.0).
 - ProPainter-based implementations were excluded from production because upstream licensing is non-commercial.
 
-### Promotion decision
+### promotion decision
 **NO CODE PROMOTION.** No executable implementation was available.
 
 ## Loop 009 — 2026-09-16
@@ -135,3 +135,11 @@
 
 ### promotion decision
 **AUDIT/DOCUMENTATION ONLY. KEEP STABLE CODE UNCHANGED.**
+
+## Loop 027 — 2026-09-16
+- Escalation audit found boundary inputs were less strict than routing/QC: arbitrary strings or mapping-like QC payloads could fail late or expose inconsistent error behavior. `next_engine`/`decide_escalation` now fail closed unless given the declared `Engine` and `QCDecision` types; regression tests cover malformed inputs.
+- Research refresh reconfirmed Netflix VOID and Xiaomi SVOR as Apache-2.0 advanced-removal candidates. A recent watermark-removal implementation reinforces crop-only, shot-aware, windowed processing as a practical low-VRAM pattern already represented in this core; its ProPainter dependency is not imported into the commercial production path.
+- Changes are isolated to `feature/vmake-parity-core`. No local test run was available in this environment, and no GitHub Actions run was present for head `6cc5e88` when checked, so no passing-test claim is made. `main` remains unchanged.
+
+### promotion decision
+**KEEP ON DEVELOPMENT BRANCH PENDING CI AND PAIRED-VIDEO BENCHMARKS.**
