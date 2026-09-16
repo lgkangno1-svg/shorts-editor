@@ -14,6 +14,7 @@ from shorts_editor.local_vsr import (
     track_to_vsr_keyframes,
     vsr_mode_for_engine,
 )
+from shorts_editor.precision_masks import rectangle_mask_polygon
 from shorts_editor.routing import Engine
 from shorts_editor.tracks import BoundingBox, RemovalTrack, TargetKind, TrackSample
 
@@ -60,14 +61,39 @@ def test_multi_sample_track_rejects_single_keyframe_budget():
         track_to_vsr_keyframes(subtitle_track(), frame_width=1000, frame_height=500, fps=30, max_keyframes=1)
 
 
-def test_track_overlay_skips_second_detection_and_enables_quality_verification():
+def test_coarse_consensus_track_is_guidance_only_by_default():
     cfg = VSRRunnerConfig((sys.executable, "-m", "backend.processor"))
-    overlay = build_vsr_config_overlay(cfg, track=subtitle_track(), frame_width=1000, frame_height=500, fps=30)
+    overlay = build_vsr_config_overlay(cfg, track=subtitle_track())
     assert overlay["detection_engine"] == "rapidocr"
     assert overlay["quality_report"] is True
     assert overlay["verify_removal"] is True
+    assert overlay["temporal_mask_union"] is False
+    assert overlay["temporal_mask_window"] == 3
+    assert "sttn_skip_detection" not in overlay
+    assert "subtitle_region_keyframes" not in overlay
+
+
+def test_coarse_track_mask_requires_explicit_opt_in():
+    cfg = VSRRunnerConfig((sys.executable, "-m", "backend.processor"), coarse_track_mask=True)
+    overlay = build_vsr_config_overlay(cfg, track=subtitle_track(), frame_width=1000, frame_height=500, fps=30)
     assert overlay["sttn_skip_detection"] is True
     assert len(overlay["subtitle_region_keyframes"][0]["keyframes"]) == 2
+
+
+def test_precise_glyph_masks_are_additive_without_disabling_vsr_ocr():
+    cfg = VSRRunnerConfig((sys.executable, "-m", "backend.processor"))
+    mask = rectangle_mask_polygon(3, x1=0.45, y1=0.50, x2=0.50, y2=0.54, confidence=0.95)
+    overlay = build_vsr_config_overlay(
+        cfg,
+        track=subtitle_track(),
+        precise_masks=[mask],
+        frame_width=720,
+        frame_height=1280,
+        fps=30,
+    )
+    assert len(overlay["manual_mask_corrections"]) == 1
+    assert "sttn_skip_detection" not in overlay
+    assert "subtitle_region_keyframes" not in overlay
 
 
 def test_command_is_shell_free_argument_vector():
@@ -92,29 +118,31 @@ def test_offline_environment_sets_common_hub_guards():
     assert env["TRANSFORMERS_OFFLINE"] == "1"
 
 
-def test_local_runner_passes_config_to_fake_process(tmp_path):
+def test_local_runner_passes_precise_masks_to_fake_process(tmp_path):
     fake = tmp_path / "fake_vsr.py"
     fake.write_text(
         "import json, pathlib, sys\n"
         "args=sys.argv[1:]\n"
         "cfg=pathlib.Path(args[args.index('--config')+1])\n"
         "payload=json.loads(cfg.read_text(encoding='utf-8'))\n"
-        "print(json.dumps({'ok': True, 'mode': args[args.index('-m')+1], 'quality': payload['quality_report'], 'skip': payload.get('sttn_skip_detection', False)}))\n",
+        "print(json.dumps({'ok': True, 'mode': args[args.index('-m')+1], 'quality': payload['quality_report'], 'skip': payload.get('sttn_skip_detection', False), 'corrections': len(payload.get('manual_mask_corrections', []))}))\n",
         encoding="utf-8",
     )
     input_path = tmp_path / "input.mp4"
     input_path.write_bytes(b"fixture")
     output_path = tmp_path / "output.mp4"
     cfg = VSRRunnerConfig((sys.executable, str(fake)))
+    mask = rectangle_mask_polygon(0, x1=0.1, y1=0.2, x2=0.2, y2=0.25)
     result = run_vsr_local(
         cfg,
         input_path=str(input_path),
         output_path=str(output_path),
         engine=Engine.LOCAL_TEMPORAL,
         track=subtitle_track(),
+        precise_masks=[mask],
         frame_width=1000,
         frame_height=500,
         fps=30,
         timeout_seconds=5,
     )
-    assert result.payload == {"ok": True, "mode": "sttn", "quality": True, "skip": True}
+    assert result.payload == {"ok": True, "mode": "sttn", "quality": True, "skip": False, "corrections": 1}
