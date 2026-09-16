@@ -26,19 +26,24 @@ def test_moving_watermark_track():
     assert not track.has_tracking_risk()
 
 
-def test_tracking_risk_flags_confidence_collapse_and_large_jump():
+def test_tracking_risk_flags_confidence_collapse_and_large_velocity():
     low_conf = RemovalTrack(
         "wm-low", TargetKind.WATERMARK, (sample(0), sample(1, confidence=0.2))
     )
     jump = RemovalTrack("wm-jump", TargetKind.WATERMARK, (sample(0), sample(1, x=0.5)))
     assert low_conf.has_tracking_risk()
-    assert jump.has_tracking_risk(max_center_jump=0.25)
+    assert jump.has_tracking_risk(max_center_velocity=0.25)
 
 
 def test_sparse_samples_use_per_frame_motion_for_risk():
     track = RemovalTrack("sparse", TargetKind.OBJECT, (sample(0), sample(10, x=0.5)))
     assert track.max_center_jump() == pytest.approx(0.4)
     assert track.max_center_velocity() == pytest.approx(0.04)
+    assert not track.has_tracking_risk(max_center_velocity=0.25)
+
+
+def test_legacy_jump_keyword_keeps_velocity_semantics():
+    track = RemovalTrack("legacy", TargetKind.OBJECT, (sample(0), sample(10, x=0.5)))
     assert not track.has_tracking_risk(max_center_jump=0.25)
 
 
@@ -47,7 +52,9 @@ def test_tracking_risk_thresholds_are_validated():
     with pytest.raises(ValueError):
         track.has_tracking_risk(min_confidence=1.1)
     with pytest.raises(ValueError):
-        track.has_tracking_risk(max_center_jump=-0.1)
+        track.has_tracking_risk(max_center_velocity=-0.1)
+    with pytest.raises(ValueError):
+        track.has_tracking_risk(max_center_velocity=0.2, max_center_jump=0.2)
 
 
 def test_box_rejects_out_of_frame_region():
