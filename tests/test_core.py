@@ -35,6 +35,18 @@ def test_invalid_signal_rejected():
         req(motion_score=1.1)
 
 
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_routing_rejects_non_finite_normalized_signals(value):
+    with pytest.raises(ValueError):
+        req(motion_score=value)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_routing_rejects_non_finite_duration(value):
+    with pytest.raises(ValueError):
+        req(duration_seconds=value)
+
+
 def test_qc_passes_clean_result():
     result = evaluate_qc(QCMetrics(0.05, 0.05, 0.05, 0.01))
     assert result.passed
