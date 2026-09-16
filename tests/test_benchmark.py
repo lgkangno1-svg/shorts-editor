@@ -68,6 +68,14 @@ def test_mismatched_video_shapes_are_rejected():
         evaluate_paired_video(overlay[:, :, :-1], clean, clean, mask)
 
 
+def test_unsupported_video_channel_count_is_rejected():
+    overlay, clean, mask = fixture_frames()
+    malformed_overlay = np.zeros((3, 8, 8, 2), dtype=np.uint8)
+    malformed_clean = np.zeros_like(malformed_overlay)
+    with pytest.raises(ValueError, match="channels must be 1, 3, or 4"):
+        evaluate_paired_video(malformed_overlay, malformed_clean.copy(), malformed_clean, mask)
+
+
 def test_empty_mask_is_rejected():
     overlay, clean, _mask = fixture_frames()
     empty = np.zeros((3, 8, 8), dtype=bool)
