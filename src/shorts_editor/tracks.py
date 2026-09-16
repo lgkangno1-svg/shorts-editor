@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from math import hypot
+from math import hypot, isfinite
 
 
 class TargetKind(str, Enum):
@@ -25,8 +25,8 @@ class BoundingBox:
 
     def __post_init__(self) -> None:
         values = (self.x, self.y, self.width, self.height)
-        if any(not 0.0 <= value <= 1.0 for value in values):
-            raise ValueError("box values must be in [0, 1]")
+        if any(not isfinite(value) or not 0.0 <= value <= 1.0 for value in values):
+            raise ValueError("box values must be finite and in [0, 1]")
         if self.width <= 0 or self.height <= 0:
             raise ValueError("box width and height must be > 0")
         if self.x + self.width > 1.0 or self.y + self.height > 1.0:
@@ -50,8 +50,8 @@ class TrackSample:
     def __post_init__(self) -> None:
         if self.frame_index < 0:
             raise ValueError("frame_index must be >= 0")
-        if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError("confidence must be in [0, 1]")
+        if not isfinite(self.confidence) or not 0.0 <= self.confidence <= 1.0:
+            raise ValueError("confidence must be finite and in [0, 1]")
 
 
 @dataclass(frozen=True)
@@ -117,14 +117,14 @@ class RemovalTrack:
         Supplying both thresholds is rejected because their units/intent would be
         ambiguous at the call site.
         """
-        if not 0.0 <= min_confidence <= 1.0:
-            raise ValueError("min_confidence must be in [0, 1]")
+        if not isfinite(min_confidence) or not 0.0 <= min_confidence <= 1.0:
+            raise ValueError("min_confidence must be finite and in [0, 1]")
         if max_center_jump is not None:
             if max_center_velocity != 0.25:
                 raise ValueError("use only max_center_velocity; max_center_jump is a compatibility alias")
             max_center_velocity = max_center_jump
-        if max_center_velocity < 0.0:
-            raise ValueError("max_center_velocity must be >= 0")
+        if not isfinite(max_center_velocity) or max_center_velocity < 0.0:
+            raise ValueError("max_center_velocity must be finite and >= 0")
         return self.min_confidence < min_confidence or self.max_center_velocity() > max_center_velocity
 
     @property
