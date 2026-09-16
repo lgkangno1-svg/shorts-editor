@@ -116,3 +116,9 @@
 - `FrameChunk` boundaries and `plan_chunks` frame counts, limits, and scene-cut indices now reject booleans and non-integers up front; regression coverage was added for each class.
 - Research refresh: Netflix VOID and Xiaomi SVOR remain Apache-2.0 commercial candidates. VOID's interaction-aware quadmask/two-pass refinement remains a Smart-Pro candidate rather than a local default because the official model card recommends 40GB+ VRAM. MiniMax-Remover remains excluded because its weights are CC-BY-NC-4.0. DiffuEraser remains unsuitable for the commercial default while its published pipeline depends on ProPainter licensing.
 - No local or CI pass is claimed for this new head. `main` remains unchanged pending green CI and objective paired-video benchmarks.
+
+## Loop 024 — 2026-09-16
+- Global QC/escalation audit found `QCDecision` itself trusted caller-supplied values. A malformed manually constructed decision could carry NaN/out-of-range scores, non-boolean pass flags, or an empty reason into escalation even though `evaluate_qc` is fail-closed.
+- `QCDecision` now validates boolean pass state, finite [0,1] score, and non-empty reason; regression tests cover malformed decision inputs.
+- Research refresh reconfirmed Apache-2.0 SAM2/SAMURAI for mask tracking and VOID/SVOR for advanced removal. VOID remains Smart-Pro class due to its documented 40GB+ GPU requirement. MiniMax-Remover weights remain excluded as CC-BY-NC-4.0; DiffuEraser's published ProPainter-dependent path remains excluded from the commercial default.
+- No local or CI pass is claimed for this new head. `main` remains unchanged pending green CI and objective paired-video benchmarks.
