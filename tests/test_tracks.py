@@ -81,3 +81,30 @@ def test_track_rejects_duplicate_or_unsorted_frames():
         RemovalTrack("bad", TargetKind.LOGO, (sample(1), sample(1)))
     with pytest.raises(ValueError):
         RemovalTrack("bad", TargetKind.LOGO, (sample(2), sample(1)))
+
+
+def test_track_primitives_reject_bool_and_wrong_runtime_types():
+    with pytest.raises(TypeError):
+        BoundingBox(True, 0.1, 0.1, 0.1)
+    with pytest.raises(TypeError):
+        TrackSample(True, BoundingBox(0.1, 0.1, 0.1, 0.1), 0.9)
+    with pytest.raises(TypeError):
+        TrackSample(0, "not-a-box", 0.9)
+    with pytest.raises(TypeError):
+        TrackSample(0, BoundingBox(0.1, 0.1, 0.1, 0.1), True)
+    with pytest.raises(TypeError):
+        RemovalTrack("x", "subtitle", (sample(0),))
+    with pytest.raises((TypeError, ValueError)):
+        RemovalTrack(123, TargetKind.SUBTITLE, (sample(0),))
+    with pytest.raises((TypeError, ValueError)):
+        RemovalTrack("x", TargetKind.SUBTITLE, [sample(0)])
+
+
+def test_tracking_risk_rejects_boolean_thresholds():
+    track = RemovalTrack("wm-1", TargetKind.WATERMARK, (sample(0),))
+    with pytest.raises(TypeError):
+        track.has_tracking_risk(min_confidence=True)
+    with pytest.raises(TypeError):
+        track.has_tracking_risk(max_center_velocity=True)
+    with pytest.raises(TypeError):
+        track.has_tracking_risk(max_center_jump=True)

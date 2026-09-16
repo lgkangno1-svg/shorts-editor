@@ -25,6 +25,8 @@ class BoundingBox:
 
     def __post_init__(self) -> None:
         values = (self.x, self.y, self.width, self.height)
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in values):
+            raise TypeError("box values must be real numbers")
         if any(not isfinite(value) or not 0.0 <= value <= 1.0 for value in values):
             raise ValueError("box values must be finite and in [0, 1]")
         if self.width <= 0 or self.height <= 0:
@@ -48,8 +50,14 @@ class TrackSample:
     confidence: float
 
     def __post_init__(self) -> None:
+        if isinstance(self.frame_index, bool) or not isinstance(self.frame_index, int):
+            raise TypeError("frame_index must be an integer")
         if self.frame_index < 0:
             raise ValueError("frame_index must be >= 0")
+        if not isinstance(self.box, BoundingBox):
+            raise TypeError("box must be a BoundingBox")
+        if isinstance(self.confidence, bool) or not isinstance(self.confidence, (int, float)):
+            raise TypeError("confidence must be a real number")
         if not isfinite(self.confidence) or not 0.0 <= self.confidence <= 1.0:
             raise ValueError("confidence must be finite and in [0, 1]")
 
@@ -63,10 +71,14 @@ class RemovalTrack:
     samples: tuple[TrackSample, ...]
 
     def __post_init__(self) -> None:
-        if not self.track_id.strip():
-            raise ValueError("track_id must not be empty")
-        if not self.samples:
-            raise ValueError("track must contain at least one sample")
+        if not isinstance(self.track_id, str) or not self.track_id.strip():
+            raise ValueError("track_id must be a non-empty string")
+        if not isinstance(self.kind, TargetKind):
+            raise TypeError("kind must be a TargetKind")
+        if not isinstance(self.samples, tuple) or not self.samples:
+            raise ValueError("track samples must be a non-empty tuple")
+        if any(not isinstance(sample, TrackSample) for sample in self.samples):
+            raise TypeError("track samples must contain TrackSample values")
         indices = [sample.frame_index for sample in self.samples]
         if indices != sorted(indices) or len(indices) != len(set(indices)):
             raise ValueError("track samples must have unique ascending frame indices")
@@ -117,12 +129,18 @@ class RemovalTrack:
         Supplying both thresholds is rejected because their units/intent would be
         ambiguous at the call site.
         """
+        if isinstance(min_confidence, bool) or not isinstance(min_confidence, (int, float)):
+            raise TypeError("min_confidence must be a real number")
         if not isfinite(min_confidence) or not 0.0 <= min_confidence <= 1.0:
             raise ValueError("min_confidence must be finite and in [0, 1]")
         if max_center_jump is not None:
+            if isinstance(max_center_jump, bool) or not isinstance(max_center_jump, (int, float)):
+                raise TypeError("max_center_jump must be a real number")
             if max_center_velocity != 0.25:
                 raise ValueError("use only max_center_velocity; max_center_jump is a compatibility alias")
             max_center_velocity = max_center_jump
+        if isinstance(max_center_velocity, bool) or not isinstance(max_center_velocity, (int, float)):
+            raise TypeError("max_center_velocity must be a real number")
         if not isfinite(max_center_velocity) or max_center_velocity < 0.0:
             raise ValueError("max_center_velocity must be finite and >= 0")
         return self.min_confidence < min_confidence or self.max_center_velocity() > max_center_velocity
