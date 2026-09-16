@@ -2,7 +2,7 @@
 
 Updated: 2026-09-16
 Stable branch: `main`
-Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise-masks`, `feature/rapidocr-frame-adapter`
+Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise-masks`, `feature/rapidocr-frame-adapter`, `feature/paired-video-benchmark`
 
 ## P0 removal core
 
@@ -20,9 +20,10 @@ Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise
 | Residual OCR verification | Enabled in VSR adapter | VSR `verify_removal` + quality report requested by default |
 | Real OCR frame adapter | Implemented / stable | RapidOCR 3.x line output feeds tracking while `return_word_box=True` word polygons feed precise masks; NumPy-backed output is covered by tests |
 | OCR runtime dependency | Optional / local | `.[ocr]` installs `rapidocr>=3.9.2,<4`; Korean is the default engine language; no paid/cloud API |
+| Paired-video benchmark core | Implemented / stable | `evaluate_paired_video()` measures residual, flicker, boundary spill and protected-region damage against clean reference frames and feeds the existing fail-closed QC gate |
 | Commercial video mask propagation | Candidate stage | SAM 2 (Apache-2.0), Cutie/XMem (MIT) require runtime/integration benchmarks |
-| Paired-video objective benchmark | Required for parity claims | full external VSR/STTN/LaMa paired benchmark has not yet been completed |
-| Stable promotion | Promoted | precise-mask safety merged through PR #2 and RapidOCR adapter through PR #3; both PR CI matrices passed Python 3.10/3.12 |
+| Full real-video parity benchmark | Pending fixture/runtime evidence | measurement code is stable; full external VSR/STTN/LaMa runs still need executable local runtime plus suitable reference fixtures |
+| Stable promotion | Promoted | precise-mask safety PR #2, RapidOCR adapter PR #3 and paired benchmark PR #4 all passed Python 3.10/3.12 PR CI before merge |
 
 ## Commercial dependency policy
 
@@ -30,4 +31,4 @@ Production/default paths may use commercially compatible local components such a
 
 ## Current quality statement
 
-`main` is the stable executable baseline. Subtitle OCR now has a concrete local RapidOCR path and broad consensus boxes no longer become destructive masks unless explicitly requested. Vmake-quality parity is **not yet claimed**. The next evidence milestone is a reproducible real-video benchmark with residual-text, flicker, boundary and protected-background-damage measurements, followed by temporal propagation only where those metrics improve.
+`main` is the stable executable baseline. Subtitle OCR has a concrete local RapidOCR path, broad consensus boxes are non-destructive by default, and objective paired-reference scoring is now implemented. Vmake-quality parity is **not yet claimed**. The next evidence milestone is running the benchmark on real removal outputs and then enabling temporal propagation only when measured residual/flicker/background-damage scores improve.
