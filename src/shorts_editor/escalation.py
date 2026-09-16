@@ -16,8 +16,14 @@ class EscalationDecision:
     reason: str
 
 
+def _require_engine(current: Engine) -> None:
+    if not isinstance(current, Engine):
+        raise TypeError("current must be an Engine")
+
+
 def next_engine(current: Engine) -> Engine | None:
     """Return the next stronger engine, or None when no stronger engine exists."""
+    _require_engine(current)
     index = _ESCALATION_ORDER.index(current)
     if index + 1 >= len(_ESCALATION_ORDER):
         return None
@@ -26,6 +32,9 @@ def next_engine(current: Engine) -> Engine | None:
 
 def decide_escalation(current: Engine, qc: QCDecision) -> EscalationDecision:
     """Retry a failed render with a stronger engine; never loop at Smart Pro."""
+    _require_engine(current)
+    if not isinstance(qc, QCDecision):
+        raise TypeError("qc must be a QCDecision")
     if qc.passed:
         return EscalationDecision(False, current, "quality gate passed")
 
