@@ -2,8 +2,10 @@ name: cleanup-core-ci
 
 on:
   push:
-    branches: ["feature/vmake-parity-core"]
+    branches: ["feature/vmake-parity-core", "main"]
   pull_request:
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   test:
