@@ -122,3 +122,16 @@
 - `QCDecision` now validates boolean pass state, finite [0,1] score, and non-empty reason; regression tests cover malformed decision inputs.
 - Research refresh reconfirmed Apache-2.0 SAM2/SAMURAI for mask tracking and VOID/SVOR for advanced removal. VOID remains Smart-Pro class due to its documented 40GB+ GPU requirement. MiniMax-Remover weights remain excluded as CC-BY-NC-4.0; DiffuEraser's published ProPainter-dependent path remains excluded from the commercial default.
 - No local or CI pass is claimed for this new head. `main` remains unchanged pending green CI and objective paired-video benchmarks.
+
+## Loop 025 — 2026-09-16
+- QC metric and threshold type-safety was tightened so boolean values cannot masquerade as numeric 0/1 quality signals; regression coverage was added.
+- This head (`eb596c5`) was subsequently verified by GitHub Actions run 35081562129: `cleanup-core-ci` completed successfully on the branch.
+
+## Loop 026 — 2026-09-16
+- Global audit found no additional low-risk source change with evidence strong enough to justify modifying the currently green core. `main` remains only the standalone repository bootstrap, so there is still no executable stable quality baseline against which real video quality can honestly be compared.
+- External refresh reconfirmed official Netflix VOID and its Hugging Face weights as Apache-2.0; VOID remains Smart-Pro/research class because of its high GPU requirement. Official SAM2 code/checkpoints remain Apache-2.0 and suitable for mask propagation. MiniMax-Remover remains excluded from production because the surfaced weights are non-commercial. DiffuEraser is not promoted because its published implementation uses ProPainter as a prior and explicitly requires compliance with that upstream license.
+- A useful implementation pattern from recent ProPainter wrappers is windowed, shot-aware, crop-only processing; the architecture already has scene-aware chunks, padded crops, and temporal windows, so no model dependency was imported merely to duplicate those ideas.
+- No new benchmark was run in this loop. Existing CI evidence is limited to the current pre-documentation head; objective paired clean/overlay video fixtures remain the promotion blocker.
+
+### promotion decision
+**AUDIT/DOCUMENTATION ONLY. KEEP STABLE CODE UNCHANGED.**
