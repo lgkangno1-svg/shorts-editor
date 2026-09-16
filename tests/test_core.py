@@ -1,6 +1,6 @@
 import pytest
 
-from shorts_editor.qc import QCMetrics, evaluate_qc
+from shorts_editor.qc import QCDecision, QCMetrics, evaluate_qc
 from shorts_editor.routing import CleanupRequest, Engine, route_cleanup
 
 
@@ -72,3 +72,21 @@ def test_qc_rejects_non_finite_metrics(value):
 def test_qc_rejects_non_finite_threshold():
     with pytest.raises(ValueError):
         evaluate_qc(QCMetrics(0.01, 0.01, 0.01, 0.01), threshold=float("nan"))
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf"), -0.1, 1.1, True])
+def test_qc_decision_rejects_invalid_score(value):
+    with pytest.raises(ValueError):
+        QCDecision(False, value, "invalid render")
+
+
+@pytest.mark.parametrize("value", [0, 1, "yes", None])
+def test_qc_decision_requires_boolean_passed(value):
+    with pytest.raises(ValueError):
+        QCDecision(value, 0.5, "invalid render")
+
+
+@pytest.mark.parametrize("value", ["", "   ", None])
+def test_qc_decision_requires_reason(value):
+    with pytest.raises(ValueError):
+        QCDecision(False, 0.5, value)
