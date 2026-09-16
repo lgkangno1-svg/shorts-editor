@@ -93,3 +93,9 @@
 - Fixed a fail-open QC defect: NaN metric/threshold values previously bypassed range comparisons and could produce a passing decision. QC now rejects all non-finite inputs; regression tests cover NaN and infinities.
 - External review reconfirmed Apache-2.0 VOID/SVOR as candidates and ProPainter-dependent paths as unsuitable for the commercial default. BeyondMasks/CORE is a promising 2026 paired object-removal benchmark/evaluator to assess before adoption.
 - Changes are committed only on `feature/vmake-parity-core`; no local/CI pass is claimed for this head and `main` remains unchanged.
+
+## Loop 020 — 2026-09-16
+- Global validation audit found the same non-finite fail-open class in pre-inference routing: NaN normalized signals could survive validation and collapse the difficulty clamp toward an easy route; NaN duration also bypassed the positive-duration check.
+- Routing now rejects NaN and infinities for every normalized signal and duration before engine selection; regression tests cover both signal and duration inputs.
+- Research refresh: Netflix VOID and Xiaomi SVOR remain Apache-2.0 commercial candidates; MiniMax-Remover weights remain excluded (CC-BY-NC-4.0). EffectErase and D2DF are promising 2026 candidates but require dependency/license-chain and paired-video benchmarking before production adoption.
+- No local or CI pass is claimed for this head. `main` remains unchanged pending objective video benchmarks and green CI.
