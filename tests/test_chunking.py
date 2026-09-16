@@ -21,3 +21,25 @@ def test_chunks_never_cross_scene_cut():
 def test_invalid_scene_cut_fails_closed():
     with pytest.raises(ValueError):
         plan_chunks(10, 5, (10,))
+
+
+@pytest.mark.parametrize(
+    ("frame_count", "max_frames", "scene_cuts"),
+    [
+        (10.5, 5, ()),
+        (True, 5, ()),
+        (10, 2.5, ()),
+        (10, False, ()),
+        (10, 5, (3.5,)),
+        (10, 5, (True,)),
+    ],
+)
+def test_chunk_planner_rejects_non_integer_frame_values(frame_count, max_frames, scene_cuts):
+    with pytest.raises(ValueError):
+        plan_chunks(frame_count, max_frames, scene_cuts)
+
+
+@pytest.mark.parametrize("start,end", [(0.5, 2), (False, 2), (0, 2.5), (0, True)])
+def test_frame_chunk_rejects_non_integer_boundaries(start, end):
+    with pytest.raises(ValueError):
+        FrameChunk(start, end)
