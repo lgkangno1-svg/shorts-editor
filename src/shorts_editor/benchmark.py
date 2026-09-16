@@ -80,6 +80,10 @@ def _mask_array(value: object, expected_shape: tuple[int, int, int]):
         raise ValueError("removal_mask must have shape [frames, height, width] matching the videos")
     if array.dtype.kind in "fc" and not bool(np.isfinite(array).all()):
         raise ValueError("removal_mask must contain only finite values")
+    if array.dtype.kind not in "bui f".replace(" ", ""):
+        raise TypeError("removal_mask must contain boolean or numeric values")
+    if not bool(np.logical_or(array == 0, array == 1).all()):
+        raise ValueError("removal_mask must contain only binary 0/1 values")
     return array.astype(bool, copy=False)
 
 
