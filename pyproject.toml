@@ -12,6 +12,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<9"]
+ocr = ["rapidocr>=3.9.2,<4"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
