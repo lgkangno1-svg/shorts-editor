@@ -1,5 +1,6 @@
 """Video cleanup core."""
 
+from .benchmark import PairedBenchmarkResult, evaluate_paired_video
 from .local_vsr import VSRRunnerConfig, run_vsr_local
 from .ocr_adapters import (
     OCRFrameAdapterResult,
@@ -28,6 +29,7 @@ __all__ = [
     "Engine",
     "OCRDetection",
     "OCRFrameAdapterResult",
+    "PairedBenchmarkResult",
     "PreciseMaskPolygon",
     "RouteDecision",
     "SubtitleConsensusConfig",
@@ -38,6 +40,7 @@ __all__ = [
     "create_rapidocr_engine",
     "dedupe_precise_masks",
     "detect_subtitle_tracks",
+    "evaluate_paired_video",
     "precise_masks_to_vsr_corrections",
     "rectangle_mask_polygon",
     "refine_subtitle_track",
