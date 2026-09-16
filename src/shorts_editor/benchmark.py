@@ -65,8 +65,10 @@ def _video_array(value: object, name: str):
     array = np.asarray(value)
     if array.ndim != 4:
         raise ValueError(f"{name} must have shape [frames, height, width, channels]")
-    if array.shape[0] <= 0 or array.shape[1] <= 0 or array.shape[2] <= 0 or array.shape[3] <= 0:
+    if array.shape[0] <= 0 or array.shape[1] <= 0 or array.shape[2] <= 0:
         raise ValueError(f"{name} dimensions must be non-empty")
+    if array.shape[3] not in (1, 3, 4):
+        raise ValueError(f"{name} channels must be 1, 3, or 4")
     array = array.astype(np.float32, copy=False)
     if not bool(np.isfinite(array).all()):
         raise ValueError(f"{name} must contain only finite pixels")
