@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from importlib import import_module
 from math import isfinite
+from numbers import Real
 from typing import Mapping
 
 from .precision_masks import PreciseMaskPolygon, dedupe_precise_masks
@@ -27,7 +28,7 @@ def _positive_int(value: object, name: str, *, minimum: int = 1) -> int:
 
 
 def _unit_real(value: object, name: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
+    if isinstance(value, bool) or not isinstance(value, Real):
         raise TypeError(f"{name} must be a real number")
     result = float(value)
     if not isfinite(result) or not 0.0 <= result <= 1.0:
@@ -69,9 +70,9 @@ def _pixel_polygon_to_normalized(
         if len(coords) != 2:
             raise ValueError("polygon points must have two coordinates")
         x, y = coords
-        if isinstance(x, bool) or not isinstance(x, (int, float)):
+        if isinstance(x, bool) or not isinstance(x, Real):
             raise TypeError("polygon x coordinate must be a real number")
-        if isinstance(y, bool) or not isinstance(y, (int, float)):
+        if isinstance(y, bool) or not isinstance(y, Real):
             raise TypeError("polygon y coordinate must be a real number")
         x = float(x)
         y = float(y)
@@ -96,7 +97,7 @@ def _looks_like_word_item(value: object) -> bool:
         parts = tuple(value)  # type: ignore[arg-type]
     except TypeError:
         return False
-    return len(parts) == 3 and isinstance(parts[0], str) and isinstance(parts[1], (int, float))
+    return len(parts) == 3 and isinstance(parts[0], str) and isinstance(parts[1], Real) and not isinstance(parts[1], bool)
 
 
 def _iter_word_items(word_results: object | None) -> tuple[tuple[object, object, object], ...]:
