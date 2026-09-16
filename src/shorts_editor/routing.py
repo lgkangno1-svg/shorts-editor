@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+import math
 
 
 class Engine(str, Enum):
@@ -24,10 +25,10 @@ class CleanupRequest:
     def __post_init__(self) -> None:
         for name in ("mask_area_ratio", "motion_score", "texture_score", "occlusion_score", "mask_confidence"):
             value = getattr(self, name)
-            if not 0.0 <= value <= 1.0:
-                raise ValueError(f"{name} must be in [0, 1]")
-        if self.duration_seconds <= 0:
-            raise ValueError("duration_seconds must be > 0")
+            if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be finite and in [0, 1]")
+        if not math.isfinite(self.duration_seconds) or self.duration_seconds <= 0:
+            raise ValueError("duration_seconds must be finite and > 0")
 
 
 @dataclass(frozen=True)
