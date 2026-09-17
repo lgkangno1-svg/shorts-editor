@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from importlib import import_module
 from math import isfinite
-from numbers import Real
+from numbers import Integral, Real
 from typing import Mapping
 
 from .precision_masks import PreciseMaskPolygon, dedupe_precise_masks
@@ -20,11 +20,12 @@ class OCRFrameAdapterResult:
 
 
 def _positive_int(value: object, name: str, *, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
+    if isinstance(value, bool) or not isinstance(value, Integral):
         raise TypeError(f"{name} must be an integer")
-    if value < minimum:
+    result = int(value)
+    if result < minimum:
         raise ValueError(f"{name} must be >= {minimum}")
-    return value
+    return result
 
 
 def _unit_real(value: object, name: str) -> float:
@@ -159,11 +160,7 @@ def adapt_rapidocr_output(
         if not isinstance(text, str):
             raise TypeError("RapidOCR text values must be strings")
         try:
-            points = _pixel_polygon_to_normalized(
-                box,
-                frame_width=frame_width,
-                frame_height=frame_height,
-            )
+            points = _pixel_polygon_to_normalized(box, frame_width=frame_width, frame_height=frame_height)
             bbox = _normalized_box(points)
         except (TypeError, ValueError):
             continue
@@ -181,11 +178,7 @@ def adapt_rapidocr_output(
         if confidence < min_mask_confidence or polygon is None:
             continue
         try:
-            points = _pixel_polygon_to_normalized(
-                polygon,
-                frame_width=frame_width,
-                frame_height=frame_height,
-            )
+            points = _pixel_polygon_to_normalized(polygon, frame_width=frame_width, frame_height=frame_height)
             word_masks.append(PreciseMaskPolygon(frame_index, points, confidence))
         except (TypeError, ValueError):
             continue
@@ -239,11 +232,7 @@ def run_rapidocr_frame(
     )
 
 
-def create_rapidocr_engine(
-    *,
-    language: str = "korean",
-    text_score: float = 0.30,
-) -> object:
+def create_rapidocr_engine(*, language: str = "korean", text_score: float = 0.30) -> object:
     """Create the optional RapidOCR 3.x runtime without making it a hard dependency."""
 
     if not isinstance(language, str) or not language.strip():
@@ -254,10 +243,4 @@ def create_rapidocr_engine(
         rapidocr_cls = getattr(module, "RapidOCR")
     except (ImportError, AttributeError) as exc:
         raise RuntimeError("RapidOCR is not installed; install shorts-editor-cleanup[ocr]") from exc
-    return rapidocr_cls(
-        params={
-            "Global.return_word_box": True,
-            "Global.text_score": text_score,
-            "Rec.lang_type": language,
-        }
-    )
+    return rapidocr_cls(params={"Global.return_word_box": True, "Global.text_score": text_score, "Rec.lang_type": language})
