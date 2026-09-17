@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from math import hypot, isfinite
+from numbers import Integral
 
 
 class TargetKind(str, Enum):
@@ -50,7 +51,7 @@ class TrackSample:
     confidence: float
 
     def __post_init__(self) -> None:
-        if isinstance(self.frame_index, bool) or not isinstance(self.frame_index, int):
+        if isinstance(self.frame_index, bool) or not isinstance(self.frame_index, Integral):
             raise TypeError("frame_index must be an integer")
         if self.frame_index < 0:
             raise ValueError("frame_index must be >= 0")
