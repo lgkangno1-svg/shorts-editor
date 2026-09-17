@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from math import hypot, isfinite
+from numbers import Integral, Real
 
 
 class TargetKind(str, Enum):
@@ -25,7 +26,7 @@ class BoundingBox:
 
     def __post_init__(self) -> None:
         values = (self.x, self.y, self.width, self.height)
-        if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in values):
+        if any(isinstance(value, bool) or not isinstance(value, Real) for value in values):
             raise TypeError("box values must be real numbers")
         if any(not isfinite(value) or not 0.0 <= value <= 1.0 for value in values):
             raise ValueError("box values must be finite and in [0, 1]")
@@ -50,13 +51,13 @@ class TrackSample:
     confidence: float
 
     def __post_init__(self) -> None:
-        if isinstance(self.frame_index, bool) or not isinstance(self.frame_index, int):
+        if isinstance(self.frame_index, bool) or not isinstance(self.frame_index, Integral):
             raise TypeError("frame_index must be an integer")
         if self.frame_index < 0:
             raise ValueError("frame_index must be >= 0")
         if not isinstance(self.box, BoundingBox):
             raise TypeError("box must be a BoundingBox")
-        if isinstance(self.confidence, bool) or not isinstance(self.confidence, (int, float)):
+        if isinstance(self.confidence, bool) or not isinstance(self.confidence, Real):
             raise TypeError("confidence must be a real number")
         if not isfinite(self.confidence) or not 0.0 <= self.confidence <= 1.0:
             raise ValueError("confidence must be finite and in [0, 1]")
@@ -129,17 +130,17 @@ class RemovalTrack:
         Supplying both thresholds is rejected because their units/intent would be
         ambiguous at the call site.
         """
-        if isinstance(min_confidence, bool) or not isinstance(min_confidence, (int, float)):
+        if isinstance(min_confidence, bool) or not isinstance(min_confidence, Real):
             raise TypeError("min_confidence must be a real number")
         if not isfinite(min_confidence) or not 0.0 <= min_confidence <= 1.0:
             raise ValueError("min_confidence must be finite and in [0, 1]")
         if max_center_jump is not None:
-            if isinstance(max_center_jump, bool) or not isinstance(max_center_jump, (int, float)):
+            if isinstance(max_center_jump, bool) or not isinstance(max_center_jump, Real):
                 raise TypeError("max_center_jump must be a real number")
             if max_center_velocity != 0.25:
                 raise ValueError("use only max_center_velocity; max_center_jump is a compatibility alias")
             max_center_velocity = max_center_jump
-        if isinstance(max_center_velocity, bool) or not isinstance(max_center_velocity, (int, float)):
+        if isinstance(max_center_velocity, bool) or not isinstance(max_center_velocity, Real):
             raise TypeError("max_center_velocity must be a real number")
         if not isfinite(max_center_velocity) or max_center_velocity < 0.0:
             raise ValueError("max_center_velocity must be finite and >= 0")

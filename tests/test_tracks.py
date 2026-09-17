@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from shorts_editor.tracks import BoundingBox, RemovalTrack, TargetKind, TrackSample
@@ -108,3 +109,19 @@ def test_tracking_risk_rejects_boolean_thresholds():
         track.has_tracking_risk(max_center_velocity=True)
     with pytest.raises(TypeError):
         track.has_tracking_risk(max_center_jump=True)
+
+
+def test_tracking_accepts_numpy_numeric_scalars():
+    box = BoundingBox(np.float32(0.1), np.float64(0.2), np.float32(0.3), np.float64(0.2))
+    track = RemovalTrack(
+        "numpy-scalars",
+        TargetKind.OBJECT,
+        (
+            TrackSample(np.int32(0), box, np.float32(0.9)),
+            TrackSample(np.int64(2), BoundingBox(0.2, 0.2, 0.3, 0.2), np.float64(0.8)),
+        ),
+    )
+    assert track.min_confidence == pytest.approx(0.8)
+    assert not track.has_tracking_risk(
+        min_confidence=np.float32(0.5), max_center_velocity=np.float64(0.25)
+    )
