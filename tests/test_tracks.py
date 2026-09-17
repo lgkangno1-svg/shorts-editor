@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from shorts_editor.tracks import BoundingBox, RemovalTrack, TargetKind, TrackSample
@@ -108,3 +109,13 @@ def test_tracking_risk_rejects_boolean_thresholds():
         track.has_tracking_risk(max_center_velocity=True)
     with pytest.raises(TypeError):
         track.has_tracking_risk(max_center_jump=True)
+
+
+def test_track_sample_accepts_numpy_integral_frame_index():
+    track = RemovalTrack(
+        "numpy-frame",
+        TargetKind.OBJECT,
+        (sample(np.int64(0)), sample(np.int64(2), x=0.2)),
+    )
+    assert track.samples[0].frame_index == 0
+    assert track.max_center_velocity() == pytest.approx(0.05)
