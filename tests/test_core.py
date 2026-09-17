@@ -15,6 +15,19 @@ def test_easy_job_stays_local_fast():
     assert route_cleanup(req()).engine is Engine.LOCAL_FAST
 
 
+def test_routing_accepts_numpy_real_scalars():
+    np = pytest.importorskip("numpy")
+    decision = route_cleanup(req(
+        mask_area_ratio=np.float32(0.05),
+        motion_score=np.float64(0.1),
+        texture_score=np.float32(0.1),
+        occlusion_score=np.float64(0.05),
+        mask_confidence=np.float32(0.95),
+        duration_seconds=np.float64(10.0),
+    ))
+    assert decision.engine is Engine.LOCAL_FAST
+
+
 def test_long_easy_job_uses_temporal_engine():
     decision = route_cleanup(req(duration_seconds=90))
     assert decision.engine is Engine.LOCAL_TEMPORAL
