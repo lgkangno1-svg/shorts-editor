@@ -43,6 +43,24 @@ def test_damage_far_outside_mask_trips_protected_region_gate():
     assert result.decision.reason == "protected-region damage"
 
 
+def test_target_induced_shadow_left_behind_trips_protected_region_gate():
+    overlay, clean, mask = fixture_frames()
+    # Simulate a causal secondary effect belonging to the removed target but
+    # intentionally outside both the object mask and its protected margin.
+    shadow = np.zeros_like(mask)
+    shadow[:, 6:8, 1:7] = True
+    overlay[shadow] = 160
+
+    candidate = clean.copy()
+    candidate[shadow] = overlay[shadow]
+    result = evaluate_paired_video(overlay, candidate, clean, mask, protected_margin=1)
+
+    assert result.metrics.residual_score == 0.0
+    assert result.metrics.protected_damage_score > 0.0
+    assert result.decision.passed is False
+    assert result.decision.reason == "protected-region damage"
+
+
 def test_boundary_spill_is_measured_without_counting_as_residual():
     overlay, clean, mask = fixture_frames()
     candidate = clean.copy()
