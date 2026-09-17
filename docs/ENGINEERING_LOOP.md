@@ -143,3 +143,12 @@
 
 ### promotion decision
 **KEEP ON DEVELOPMENT BRANCH PENDING CI AND PAIRED-VIDEO BENCHMARKS.**
+
+## Loop 028 — 2026-09-17
+- Re-audited current `main` at `61297b8`: the executable cleanup core and the integral chunk-input normalization are now present on stable. The chunk planner validates all frame indices through one `numbers.Integral` gate, so no duplicate low-risk type patch was justified.
+- Packaging remains intentionally minimal (`setuptools`, zero runtime dependencies; NumPy/RapidOCR are optional), which reduces production dependency risk. No dead dependency was added or removed in this pass.
+- Research refresh: official Netflix VOID remains Apache-2.0 and is suitable only as a high-resource Smart-Pro candidate; official SAM2 code/checkpoints remain Apache-2.0 for mask propagation. A new MIT bidirectional-SAM2/Wan-VACE workflow provides useful long-video engineering ideas (81-frame chunking, bidirectional propagation, mask growth/feathering), but its full model-weight license chain was not verified, so it was not imported. SAM2Matting was explicitly rejected for production because it is CC BY-NC-SA 4.0. DiffuEraser remains excluded from the commercial default because its published pipeline uses ProPainter and requires compliance with that upstream license.
+- No code change or benchmark was run in this pass. GitHub reported no pull-request workflow run for current main head `61297b8` via the available commit-run query, so this loop makes no new CI-pass claim. Objective paired clean/overlay video benchmarks remain the main quality-promotion blocker.
+
+### promotion decision
+**AUDIT/DOCUMENTATION ONLY. STABLE CODE UNCHANGED.**
