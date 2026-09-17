@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from numbers import Integral
 
 from .chunking import FrameChunk
 
@@ -32,10 +33,12 @@ def plan_processing_windows(
     Windows never extend outside `chunk`, so callers can first use scene-aware
     chunking and safely add overlap without leaking context across shot cuts.
     """
-    if isinstance(max_frames, bool) or not isinstance(max_frames, int):
+    if isinstance(max_frames, bool) or not isinstance(max_frames, Integral):
         raise TypeError("max_frames must be an integer frame count")
-    if isinstance(overlap_frames, bool) or not isinstance(overlap_frames, int):
+    if isinstance(overlap_frames, bool) or not isinstance(overlap_frames, Integral):
         raise TypeError("overlap_frames must be an integer frame count")
+    max_frames = int(max_frames)
+    overlap_frames = int(overlap_frames)
     if max_frames <= 0:
         raise ValueError("max_frames must be > 0")
     if overlap_frames < 0:
