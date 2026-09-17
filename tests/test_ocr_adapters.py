@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import numpy as np
 import pytest
 
 from shorts_editor.ocr_adapters import (
@@ -190,6 +191,18 @@ def test_run_rapidocr_frame_requests_word_boxes_and_infers_frame_shape():
     assert engine.calls == [(frame, {"return_word_box": True})]
     assert adapted.detections[0].frame_index == 12
     assert len(adapted.precise_masks) == 1
+
+
+def test_adapter_accepts_numpy_integral_frame_metadata():
+    result = FakeRapidOutput((), (), ())
+    adapted = adapt_rapidocr_output(
+        result,
+        frame_index=np.int64(0),
+        frame_width=np.int64(100),
+        frame_height=np.int32(50),
+    )
+    assert adapted.detections == ()
+    assert adapted.precise_masks == ()
 
 
 def test_adapter_rejects_invalid_dimensions_and_thresholds():
