@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from shorts_editor.masks import Box, crop_savings, expand_box
@@ -20,6 +21,14 @@ def test_crop_savings_for_small_corner_region():
 def test_negative_padding_fails_closed():
     with pytest.raises(ValueError):
         expand_box(Box(1, 1, 5, 5), -1, 10, 10)
+
+
+def test_pixel_geometry_accepts_numpy_integral_values():
+    box = Box(np.int32(1), np.int64(2), np.int32(5), np.int64(7))
+    assert box == Box(1, 2, 5, 7)
+    assert all(type(value) is int for value in (box.x1, box.y1, box.x2, box.y2))
+    assert expand_box(box, np.int32(1), np.int64(10), np.int32(10)) == Box(0, 1, 6, 8)
+    assert crop_savings(box, np.int64(10), np.int32(10)) == pytest.approx(0.8)
 
 
 def test_pixel_geometry_rejects_fractional_and_boolean_values():
