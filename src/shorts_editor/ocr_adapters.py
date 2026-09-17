@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from importlib import import_module
 from math import isfinite
-from numbers import Real
+from numbers import Integral, Real
 from typing import Mapping
 
 from .precision_masks import PreciseMaskPolygon, dedupe_precise_masks
@@ -20,11 +20,12 @@ class OCRFrameAdapterResult:
 
 
 def _positive_int(value: object, name: str, *, minimum: int = 1) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
+    if isinstance(value, bool) or not isinstance(value, Integral):
         raise TypeError(f"{name} must be an integer")
-    if value < minimum:
+    result = int(value)
+    if result < minimum:
         raise ValueError(f"{name} must be >= {minimum}")
-    return value
+    return result
 
 
 def _unit_real(value: object, name: str) -> float:
@@ -204,8 +205,8 @@ def _frame_dimensions(frame: object) -> tuple[int, int]:
         raise TypeError("frame.shape must be iterable") from exc
     if len(values) < 2:
         raise ValueError("frame.shape must contain height and width")
-    height = _positive_int(int(values[0]), "frame height", minimum=2)
-    width = _positive_int(int(values[1]), "frame width", minimum=2)
+    height = _positive_int(values[0], "frame height", minimum=2)
+    width = _positive_int(values[1], "frame width", minimum=2)
     return width, height
 
 
