@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from shorts_editor.chunking import FrameChunk
@@ -39,3 +40,14 @@ def test_window_frame_counts_reject_fractional_and_boolean_values():
         plan_processing_windows(chunk, max_frames=8, overlap_frames=1.5)
     with pytest.raises(TypeError):
         plan_processing_windows(chunk, max_frames=8, overlap_frames=False)
+
+
+def test_window_frame_counts_accept_numpy_integral_scalars():
+    windows = plan_processing_windows(
+        FrameChunk(0, 10),
+        max_frames=np.int64(8),
+        overlap_frames=np.int32(2),
+    )
+    assert windows[0].context == FrameChunk(0, 6)
+    assert windows[-1].emit.end == 10
+    assert all(type(window.context.start) is int for window in windows)
