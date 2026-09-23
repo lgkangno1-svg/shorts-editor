@@ -1,6 +1,12 @@
 """Video cleanup core."""
 
 from .benchmark import PairedBenchmarkResult, evaluate_paired_video
+from .caption_plates import (
+    CaptionPlateConfig,
+    CaptionPlateDetection,
+    detect_opaque_caption_plate,
+    detect_opaque_caption_plate_masks,
+)
 from .local_vsr import VSRRunnerConfig, run_vsr_local
 from .ocr_adapters import (
     OCRFrameAdapterResult,
@@ -25,6 +31,8 @@ from .subtitles import (
 )
 
 __all__ = [
+    "CaptionPlateConfig",
+    "CaptionPlateDetection",
     "CleanupRequest",
     "Engine",
     "OCRDetection",
@@ -39,6 +47,8 @@ __all__ = [
     "best_subtitle_track",
     "create_rapidocr_engine",
     "dedupe_precise_masks",
+    "detect_opaque_caption_plate",
+    "detect_opaque_caption_plate_masks",
     "detect_subtitle_tracks",
     "evaluate_paired_video",
     "precise_masks_to_vsr_corrections",
