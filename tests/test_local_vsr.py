@@ -6,10 +6,13 @@ from pathlib import Path
 import pytest
 
 from shorts_editor.local_vsr import (
+    VSR_RUNNER_PROTOCOL,
     VSRRunnerConfig,
+    build_vsr_capability_command,
     build_vsr_command,
     build_vsr_config_overlay,
     offline_environment,
+    probe_vsr_runner,
     run_vsr_local,
     track_to_vsr_keyframes,
     vsr_mode_for_engine,
@@ -123,6 +126,9 @@ def test_local_runner_passes_precise_masks_to_fake_process(tmp_path):
     fake.write_text(
         "import json, pathlib, sys\n"
         "args=sys.argv[1:]\n"
+        "if '--capabilities' in args:\n"
+        "    print(json.dumps({'protocol': 'shorts-editor-vsr-bridge/v1', 'modes': ['lama', 'sttn', 'auto'], 'config_overlay': True, 'json_output': True}))\n"
+        "    raise SystemExit(0)\n"
         "cfg=pathlib.Path(args[args.index('--config')+1])\n"
         "payload=json.loads(cfg.read_text(encoding='utf-8'))\n"
         "print(json.dumps({'ok': True, 'mode': args[args.index('-m')+1], 'quality': payload['quality_report'], 'skip': payload.get('sttn_skip_detection', False), 'corrections': len(payload.get('manual_mask_corrections', []))}))\n",
@@ -131,7 +137,11 @@ def test_local_runner_passes_precise_masks_to_fake_process(tmp_path):
     input_path = tmp_path / "input.mp4"
     input_path.write_bytes(b"fixture")
     output_path = tmp_path / "output.mp4"
-    cfg = VSRRunnerConfig((sys.executable, str(fake)))
+    cfg = VSRRunnerConfig(
+        (sys.executable, str(fake)),
+        commercial_use_approved=True,
+        backend_license="test-fixture",
+    )
     mask = rectangle_mask_polygon(0, x1=0.1, y1=0.2, x2=0.2, y2=0.25)
     result = run_vsr_local(
         cfg,
@@ -146,3 +156,85 @@ def test_local_runner_passes_precise_masks_to_fake_process(tmp_path):
         timeout_seconds=5,
     )
     assert result.payload == {"ok": True, "mode": "sttn", "quality": True, "skip": False, "corrections": 1}
+
+
+def test_capability_command_is_explicit_and_shell_free():
+    cfg = VSRRunnerConfig(("python", "-m", "reviewed.bridge"))
+    assert build_vsr_capability_command(cfg) == (
+        "python",
+        "-m",
+        "reviewed.bridge",
+        "--capabilities",
+        "--json",
+    )
+
+
+def test_unapproved_backend_fails_closed_before_execution(tmp_path):
+    input_path = tmp_path / "input.mp4"
+    input_path.write_bytes(b"fixture")
+    cfg = VSRRunnerConfig(("definitely-not-a-real-runner",))
+
+    with pytest.raises(RuntimeError, match="not approved for commercial use"):
+        run_vsr_local(
+            cfg,
+            input_path=str(input_path),
+            output_path=str(tmp_path / "out.mp4"),
+            engine=Engine.LOCAL_FAST,
+        )
+
+
+def test_probe_rejects_runner_without_required_protocol(tmp_path):
+    fake = tmp_path / "raw_gui_entry.py"
+    fake.write_text(
+        "import json\n"
+        "print(json.dumps({'protocol': 'some-upstream-gui', 'modes': ['sttn'], 'config_overlay': False, 'json_output': False}))\n",
+        encoding="utf-8",
+    )
+    cfg = VSRRunnerConfig((sys.executable, str(fake)))
+
+    with pytest.raises(RuntimeError, match="unsupported local removal runner protocol"):
+        probe_vsr_runner(cfg, timeout_seconds=5)
+
+
+def test_probe_accepts_reviewed_bridge_contract(tmp_path):
+    fake = tmp_path / "bridge.py"
+    fake.write_text(
+        "import json\n"
+        "print(json.dumps({'protocol': 'shorts-editor-vsr-bridge/v1', 'modes': ['lama', 'sttn'], 'config_overlay': True, 'json_output': True}))\n",
+        encoding="utf-8",
+    )
+    cfg = VSRRunnerConfig((sys.executable, str(fake)))
+    capabilities = probe_vsr_runner(cfg, timeout_seconds=5)
+
+    assert capabilities.protocol == VSR_RUNNER_PROTOCOL
+    assert capabilities.modes == ("lama", "sttn")
+    assert capabilities.config_overlay is True
+    assert capabilities.json_output is True
+
+
+def test_execution_rejects_bridge_without_required_mode(tmp_path):
+    fake = tmp_path / "lama_only_bridge.py"
+    fake.write_text(
+        "import json, sys\n"
+        "if '--capabilities' in sys.argv:\n"
+        "    print(json.dumps({'protocol': 'shorts-editor-vsr-bridge/v1', 'modes': ['lama'], 'config_overlay': True, 'json_output': True}))\n"
+        "    raise SystemExit(0)\n"
+        "raise SystemExit('processing should not be reached')\n",
+        encoding="utf-8",
+    )
+    input_path = tmp_path / "input.mp4"
+    input_path.write_bytes(b"fixture")
+    cfg = VSRRunnerConfig(
+        (sys.executable, str(fake)),
+        commercial_use_approved=True,
+        backend_license="test-fixture",
+    )
+
+    with pytest.raises(RuntimeError, match="does not support required mode: sttn"):
+        run_vsr_local(
+            cfg,
+            input_path=str(input_path),
+            output_path=str(tmp_path / "out.mp4"),
+            engine=Engine.LOCAL_TEMPORAL,
+            timeout_seconds=5,
+        )
