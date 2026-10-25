@@ -30,3 +30,26 @@ jobs:
         run: |
           python -m pip install --force-reinstall --no-deps dist/*.whl
           python -c "import shorts_editor; print(shorts_editor.__name__)"
+
+  ocr-runtime-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[ocr]'
+      - name: Execute RapidOCR through the public adapter
+        run: |
+          python - <<'PY'
+          import numpy as np
+          from shorts_editor.ocr_adapters import create_rapidocr_engine, run_rapidocr_frame
+
+          engine = create_rapidocr_engine(language="korean")
+          frame = np.zeros((96, 320, 3), dtype=np.uint8)
+          result = run_rapidocr_frame(engine, frame, frame_index=0)
+          assert result.detections == ()
+          assert result.precise_masks == ()
+          PY
