@@ -20,9 +20,17 @@ class LocalVSRMode(str):
     AUTO = "auto"
 
 
+VSR_RUNNER_PROTOCOL = "shorts-editor-vsr-bridge/v1"
+
+
 @dataclass(frozen=True)
 class VSRRunnerConfig:
-    """Configuration for the MIT-licensed VideoSubtitleRemover local CLI.
+    """Configuration for a reviewed local removal bridge.
+
+    This adapter intentionally does not assume that a third-party GUI project
+    exposes a compatible or commercially approved CLI. Execution is fail-closed:
+    a bridge must pass the protocol capability handshake and the caller must
+    record an explicit commercial-use review before destructive processing.
 
     Coarse consensus tracks are guidance-only by default. Turning them into
     destructive masks requires ``coarse_track_mask=True`` because real-video
@@ -40,6 +48,8 @@ class VSRRunnerConfig:
     coarse_track_mask: bool = False
     temporal_mask_union: bool = False
     temporal_mask_window: int = 3
+    commercial_use_approved: bool = False
+    backend_license: str | None = None
 
     def __post_init__(self) -> None:
         if not self.argv_prefix or any(not isinstance(arg, str) or not arg.strip() for arg in self.argv_prefix):
@@ -54,9 +64,13 @@ class VSRRunnerConfig:
             raise ValueError("crf must be an integer in [0, 51]")
         if not isinstance(self.detection_engine, str) or not self.detection_engine.strip():
             raise ValueError("detection_engine must be a non-empty string")
-        for name in ("quality_report", "verify_removal", "coarse_track_mask", "temporal_mask_union"):
+        for name in ("quality_report", "verify_removal", "coarse_track_mask", "temporal_mask_union", "commercial_use_approved"):
             if type(getattr(self, name)) is not bool:
                 raise TypeError(f"{name} must be a boolean")
+        if self.backend_license is not None and (not isinstance(self.backend_license, str) or not self.backend_license.strip()):
+            raise ValueError("backend_license must be a non-empty string when provided")
+        if self.commercial_use_approved and self.backend_license is None:
+            raise ValueError("backend_license is required when commercial_use_approved=True")
         if isinstance(self.temporal_mask_window, bool) or not isinstance(self.temporal_mask_window, int):
             raise TypeError("temporal_mask_window must be an integer")
         if self.temporal_mask_window < 1 or self.temporal_mask_window > 15:
@@ -68,6 +82,14 @@ class VSRExecutionResult:
     payload: Mapping[str, object]
     stdout: str
     stderr: str
+
+
+@dataclass(frozen=True)
+class VSRRunnerCapabilities:
+    protocol: str
+    modes: tuple[str, ...]
+    config_overlay: bool
+    json_output: bool
 
 
 def vsr_mode_for_engine(engine: Engine) -> str:
@@ -271,6 +293,73 @@ def _parse_json_stdout(stdout: str) -> Mapping[str, object]:
     raise ValueError("VSR stdout did not contain a JSON object")
 
 
+def build_vsr_capability_command(config: VSRRunnerConfig) -> tuple[str, ...]:
+    """Build the mandatory bridge handshake command."""
+
+    if not isinstance(config, VSRRunnerConfig):
+        raise TypeError("config must be VSRRunnerConfig")
+    return (*config.argv_prefix, "--capabilities", "--json")
+
+
+def probe_vsr_runner(
+    config: VSRRunnerConfig,
+    *,
+    timeout_seconds: float = 10.0,
+) -> VSRRunnerCapabilities:
+    """Verify that a runner implements the reviewed bridge protocol."""
+
+    if not isinstance(config, VSRRunnerConfig):
+        raise TypeError("config must be VSRRunnerConfig")
+    timeout_seconds = _positive_real(timeout_seconds, "timeout_seconds")
+    command = build_vsr_capability_command(config)
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=config.cwd,
+            env=offline_environment(),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            shell=False,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise RuntimeError(f"local removal bridge was not found: {command[0]}") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError("local removal bridge capability probe timed out") from exc
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip() or f"exit {completed.returncode}"
+        raise RuntimeError(f"local removal bridge capability probe failed: {detail[:1000]}")
+    try:
+        payload = _parse_json_stdout(completed.stdout)
+    except ValueError as exc:
+        raise RuntimeError("local removal runner does not implement the required JSON capability handshake") from exc
+
+    protocol = payload.get("protocol")
+    if protocol != VSR_RUNNER_PROTOCOL:
+        raise RuntimeError(
+            f"unsupported local removal runner protocol: {protocol!r}; expected {VSR_RUNNER_PROTOCOL!r}"
+        )
+    raw_modes = payload.get("modes")
+    if isinstance(raw_modes, (str, bytes)) or not isinstance(raw_modes, (list, tuple)):
+        raise RuntimeError("local removal runner capabilities must include a modes list")
+    modes = tuple(str(mode).strip() for mode in raw_modes if isinstance(mode, str) and str(mode).strip())
+    if not modes:
+        raise RuntimeError("local removal runner capabilities contain no supported modes")
+    config_overlay = payload.get("config_overlay")
+    json_output = payload.get("json_output")
+    if type(config_overlay) is not bool or type(json_output) is not bool:
+        raise RuntimeError("local removal runner capabilities must declare boolean config_overlay/json_output")
+    if not config_overlay or not json_output:
+        raise RuntimeError("local removal runner lacks required config-overlay or JSON-output support")
+    return VSRRunnerCapabilities(
+        protocol=protocol,
+        modes=modes,
+        config_overlay=config_overlay,
+        json_output=json_output,
+    )
+
+
 def run_vsr_local(
     config: VSRRunnerConfig,
     *,
@@ -284,9 +373,18 @@ def run_vsr_local(
     fps: float | None = None,
     timeout_seconds: float | None = None,
 ) -> VSRExecutionResult:
-    """Execute the reviewed local VSR CLI with a temporary JSON overlay."""
+    """Execute an approved bridge after a mandatory capability handshake."""
+    if not isinstance(config, VSRRunnerConfig):
+        raise TypeError("config must be VSRRunnerConfig")
+    if not config.commercial_use_approved:
+        raise RuntimeError("local removal backend is not approved for commercial use")
     if timeout_seconds is not None:
         timeout_seconds = _positive_real(timeout_seconds, "timeout_seconds")
+    probe_timeout = 10.0 if timeout_seconds is None else min(timeout_seconds, 10.0)
+    capabilities = probe_vsr_runner(config, timeout_seconds=probe_timeout)
+    required_mode = vsr_mode_for_engine(engine)
+    if required_mode not in capabilities.modes:
+        raise RuntimeError(f"local removal bridge does not support required mode: {required_mode}")
     overlay = build_vsr_config_overlay(
         config,
         track=track,

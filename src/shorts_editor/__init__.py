@@ -7,7 +7,13 @@ from .caption_plates import (
     detect_opaque_caption_plate,
     detect_opaque_caption_plate_masks,
 )
-from .local_vsr import VSRRunnerConfig, run_vsr_local
+from .local_vsr import (
+    VSR_RUNNER_PROTOCOL,
+    VSRRunnerCapabilities,
+    VSRRunnerConfig,
+    probe_vsr_runner,
+    run_vsr_local,
+)
 from .media import DecodedFrame, MediaProbe, decode_frame_rgb, probe_media
 from .ocr_adapters import (
     OCRFrameAdapterResult,
@@ -45,6 +51,8 @@ __all__ = [
     "RouteDecision",
     "SubtitleConsensusConfig",
     "SubtitleTrackCandidate",
+    "VSR_RUNNER_PROTOCOL",
+    "VSRRunnerCapabilities",
     "VSRRunnerConfig",
     "adapt_rapidocr_output",
     "best_subtitle_track",
@@ -57,6 +65,7 @@ __all__ = [
     "evaluate_paired_video",
     "precise_masks_to_vsr_corrections",
     "probe_media",
+    "probe_vsr_runner",
     "rectangle_mask_polygon",
     "refine_subtitle_track",
     "route_cleanup",

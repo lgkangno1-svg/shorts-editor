@@ -14,7 +14,7 @@ Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise
 | Subtitle mask stabilization | Implemented / stable | short-gap interpolation + temporal union envelope |
 | Precise glyph/stroke masks | Implemented / stable | normalized frame polygons, confidence gate, duplicate suppression and frame-bounded VSR corrections |
 | Coarse-mask safety | Implemented / stable | consensus subtitle rectangles are guidance-only by default; destructive coarse masks require explicit opt-in |
-| Local removal execution | Integrated adapter / stable | VSR external local runner; LaMa/STTN/AUTO mapping; no paid API |
+| Local removal execution | Bridge contract implemented / backend approval pending | LaMa/STTN/AUTO mapping remains, but destructive execution now requires an explicit commercial-use approval plus the `shorts-editor-vsr-bridge/v1` JSON capability handshake. Raw third-party GUI entrypoints are rejected fail-closed. |
 | Moving region export | Compatibility-only | coarse VSR keyframe rectangles remain available only through explicit `coarse_track_mask=True` |
 | Scene-aware temporal windows | Implemented / stable | chunking/window modules avoid crossing scene cuts |
 | QC/escalation primitives | Implemented / stable | residual/flicker/boundary/protected-damage gates and bounded escalation |
@@ -31,7 +31,7 @@ Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise
 
 ## Commercial dependency policy
 
-Production/default paths may use commercially compatible local components such as MIT/Apache-2.0 VSR, RapidOCR, PaddleOCR, SAM 2, Cutie, or XMem after integration validation. Non-commercial upstream code/weights such as ProPainter and E2FGVI remain excluded from production dependencies. GRT video inpainting is Apache-2.0 but currently targets stereo disocclusion rather than general removal, so it is not a production candidate without benchmark evidence. VOID/SVOR remain research candidates until runtime and paired-video quality justify their cost.
+Production/default paths may use local components only after their commercial terms and transitive dependencies are explicitly verified. RapidOCR, PaddleOCR, SAM 2, Cutie, and XMem remain candidates subject to integration validation. The `ppzflpp/VideoSubtitleRemover` snapshot audited at `af4f257` is **not production-approved**: its documented entrypoint is a PyQt GUI, it requires an NVIDIA GPU (minimum 1060 per its README), and the checked-out repository contains no root license file establishing commercial terms. Non-commercial upstream code/weights such as ProPainter and E2FGVI remain excluded from production dependencies. GRT is Apache-2.0 but targets stereo disocclusion rather than general removal; VOID/SVOR remain research candidates until runtime, license, and paired-video quality evidence justify integration.
 
 ## Current quality statement
 
