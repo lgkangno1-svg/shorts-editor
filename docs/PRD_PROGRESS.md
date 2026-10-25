@@ -1,6 +1,6 @@
 # Video Cleanup PRD Progress
 
-Updated: 2026-09-23
+Updated: 2026-10-26
 Stable branch: `main`
 Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise-masks`, `feature/rapidocr-frame-adapter`, `feature/paired-video-benchmark`, `feature/real-fixture-top-captions`, `feature/opaque-caption-plates-20260923`
 
@@ -22,11 +22,12 @@ Development branches: `feature/vmake-parity-core`, `feature/vmake-parity-precise
 | Real OCR frame adapter | Implemented / stable | RapidOCR 3.x line output feeds tracking while `return_word_box=True` word polygons feed precise masks; NumPy-backed output is covered by tests |
 | OCR runtime dependency | Optional / local / smoke-tested | `.[ocr]` installs `rapidocr>=3.9.2,<4` plus the required ONNX Runtime inference backend; CI executes the public adapter on a real blank frame; Korean is the default engine language; no paid/cloud API |
 | Paired-video benchmark core | Implemented / stable | `evaluate_paired_video()` measures residual, flicker, boundary spill and protected-region damage against clean reference frames and feeds the existing fail-closed QC gate |
-| Real fixture decode audit | Partial evidence | 3 uploaded fixtures were H.264 720x1280 and decoded normally; 1 uploaded fixture was AV1 360x640 and required FFmpeg in this environment after OpenCV decoding failed |
+| Real fixture decode audit | Verified current fixture set | The 4 user-supplied validation clips were re-probed from source on 2026-10-26: all are HEVC/H.265, 1080x1920, 30 fps, totaling 4,702 frames. The previous H.264/AV1 fixture note was stale and has been corrected. |
+| Portable media preflight/decode | Implemented / locally smoke-tested | `probe_media()` normalizes ffprobe metadata and `decode_frame_rgb()` uses FFmpeg RGB24 output instead of depending on OpenCV codec support. A generated 1080x1920 HEVC clip was probed and decoded end-to-end on the authorized Linux validation host. |
 | Opaque caption plates | Implemented / pending real-fixture promotion | dark backplate masks now require four-sided dark margins, brighter outer boundaries, wide/shallow geometry, repeated temporal support, and `TargetKind.SUBTITLE`; natural dark scenes and product/scene text fail closed. Synthetic regression coverage is included; the private fourth fixture still needs an executable local rerun before Vmake-parity claims |
 | Commercial video mask propagation | Candidate stage | SAM 2 (Apache-2.0), Cutie/XMem (MIT) require runtime/integration benchmarks |
 | Full real-video parity benchmark | Pending fixture/runtime evidence | measurement code is stable; full external VSR/STTN/LaMa runs still need executable local runtime plus suitable clean-reference fixtures |
-| Stable promotion | Promoted baseline | precise-mask safety PR #2, RapidOCR adapter PR #3, paired benchmark PR #4 and top-caption coverage PR #5 passed Python 3.10/3.12 PR CI before merge; opaque-plate promotion remains contingent on its branch CI and real-fixture rerun |
+| Stable promotion | Promoted baseline | precise-mask safety, RapidOCR adapter, paired benchmark, top-caption coverage and opaque-caption safeguards are on `main`; PR #29 additionally proved the packaged OCR extra can execute a real ONNX Runtime-backed adapter call in CI. |
 
 ## Commercial dependency policy
 
@@ -34,4 +35,4 @@ Production/default paths may use commercially compatible local components such a
 
 ## Current quality statement
 
-`main` is the stable executable baseline. Subtitle OCR has a concrete local RapidOCR path, top-edge captions are no longer excluded by default, broad consensus boxes are non-destructive by default, and objective paired-reference scoring is implemented. The opaque-caption branch now adds a conservative solid-backplate mask path without widening the generic OCR mask by default. Vmake-quality parity is **not yet claimed**. The next quality gaps are AV1-safe decode handling, full VSR reconstruction on the private real clips, and clean-reference scoring of the resulting renders.
+`main` is the stable executable baseline. Subtitle OCR has a concrete local RapidOCR path, top-edge captions are no longer excluded by default, broad consensus boxes are non-destructive by default, objective paired-reference scoring is implemented, and codec-sensitive inputs now have an FFprobe/FFmpeg media path. The opaque-caption path remains conservative and does not widen generic OCR masks by default. Vmake-quality parity is **not yet claimed**. The remaining quality gap is full VSR reconstruction on the private real clips followed by clean-reference/protected-region scoring of the rendered outputs.

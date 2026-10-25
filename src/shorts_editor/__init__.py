@@ -8,6 +8,7 @@ from .caption_plates import (
     detect_opaque_caption_plate_masks,
 )
 from .local_vsr import VSRRunnerConfig, run_vsr_local
+from .media import DecodedFrame, MediaProbe, decode_frame_rgb, probe_media
 from .ocr_adapters import (
     OCRFrameAdapterResult,
     adapt_rapidocr_output,
@@ -34,7 +35,9 @@ __all__ = [
     "CaptionPlateConfig",
     "CaptionPlateDetection",
     "CleanupRequest",
+    "DecodedFrame",
     "Engine",
+    "MediaProbe",
     "OCRDetection",
     "OCRFrameAdapterResult",
     "PairedBenchmarkResult",
@@ -46,12 +49,14 @@ __all__ = [
     "adapt_rapidocr_output",
     "best_subtitle_track",
     "create_rapidocr_engine",
+    "decode_frame_rgb",
     "dedupe_precise_masks",
     "detect_opaque_caption_plate",
     "detect_opaque_caption_plate_masks",
     "detect_subtitle_tracks",
     "evaluate_paired_video",
     "precise_masks_to_vsr_corrections",
+    "probe_media",
     "rectangle_mask_polygon",
     "refine_subtitle_track",
     "route_cleanup",
