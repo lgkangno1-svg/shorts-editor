@@ -15,6 +15,7 @@ from .local_vsr import (
     run_vsr_local,
 )
 from .media import DecodedFrame, MediaProbe, decode_frame_rgb, probe_media
+from .opencv_bridge import create_builtin_opencv_runner_config
 from .ocr_adapters import (
     OCRFrameAdapterResult,
     adapt_rapidocr_output,
@@ -56,6 +57,7 @@ __all__ = [
     "VSRRunnerConfig",
     "adapt_rapidocr_output",
     "best_subtitle_track",
+    "create_builtin_opencv_runner_config",
     "create_rapidocr_engine",
     "decode_frame_rgb",
     "dedupe_precise_masks",
