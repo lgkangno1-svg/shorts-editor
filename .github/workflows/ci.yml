@@ -53,3 +53,32 @@ jobs:
           assert result.detections == ()
           assert result.precise_masks == ()
           PY
+
+  media-runtime-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - run: python -m pip install -e .
+      - name: Generate, probe, and decode HEVC
+        run: |
+          ffmpeg -hide_banner -loglevel error \
+            -f lavfi -i 'testsrc2=size=360x640:rate=30' \
+            -t 0.2 -c:v libx265 -preset ultrafast -pix_fmt yuv420p /tmp/shorts-hevc-smoke.mp4
+          python - <<'PY'
+          from shorts_editor.media import decode_frame_rgb, probe_media
+
+          probe = probe_media("/tmp/shorts-hevc-smoke.mp4")
+          assert probe.video_codec == "hevc"
+          assert (probe.width, probe.height) == (360, 640)
+          assert probe.portable_decode_recommended is True
+          frame = decode_frame_rgb("/tmp/shorts-hevc-smoke.mp4", timestamp_seconds=0.1)
+          assert len(frame.rgb24) == 360 * 640 * 3
+          PY
